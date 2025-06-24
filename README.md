@@ -1,4 +1,4 @@
-This is my catalog heaven admin script, main.lua is the one I made a some time ago which is obfuscated, unobfuscated.lua is the one that is the most recent verison since I screwed up and end up leaking the source code.
+This is my catalog heaven admin script unobfuscated.lua is the one that is the most recent verison I made; but I screwed up and end up leaking the source code.
 
 
 for the unobfuscated script you can execute by copy the Unobfuscated.lua's content and pasting the script in to your executor, or you can execute it with loadstring.
