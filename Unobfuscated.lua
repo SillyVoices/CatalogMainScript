@@ -56,7 +56,7 @@ local ImportantPlayerParts = {
 }
 StarterGui:SetCore("SendNotification", {
     Title = "Catalog Heaven Admin Script",
-    Text = "Prefix is ".. prefix ,
+    Text = "Loading script...",
     Duration = 5,
 })
 
@@ -851,20 +851,7 @@ local function processCommands(UserID, str)
         end
     elseif command == "antiplatform" then --may not work very expermential
         if PlatformConnection then return end
-        PlatformConnection = RunService.Heartbeat:Connect(function()
-            for i, v in pairs(Players:GetPlayers()) do
-                task.spawn(function()
-                    if v ~= LocalPlayer then
-                        pcall(function()
-                            local char = v.Character
-                            local root = char:FindFirstChild("HumanoidRootPart")
-                            root.Size = Vector3.new(100, 100, 100)
-                            root.CanCollide = false
-                        end)
-                    end
-                end)
-            end
-        end)
+
     elseif command == "unantiplatform" then 
         if not PlatformConnection then return end
         PlatformConnection:Disconnect()
