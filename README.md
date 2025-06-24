@@ -5,7 +5,7 @@ for the unobfuscated script you can execute by copy the Unobfuscated.lua's conte
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Unobfuscated.lua"))()
 
-You see that they perform similar in terms of functionality. I am still mad at myself for leaking the source code. Somebody having my source code is fine but when they are stealing my credit, it fuels me with anger. Now that I fininshed my rant, I can hopefully sleep now.
+I am still mad at myself for leaking the source code. Somebody having my source code is fine but when they are stealing my credit, it fuels me with anger. Now that I fininshed my rant, I can hopefully sleep now.
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -14,3 +14,4 @@ To use the outdated obfuscated script it have to be like this, but it prints out
 getgenv().Prefix = "!";
 loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Main.lua))()
 
+If you tried to execute both script you can see that they perform similar in terms of functionality.
