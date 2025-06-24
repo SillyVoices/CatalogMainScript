@@ -818,11 +818,27 @@ local function forLoopForListUserID(List, func, ListToPut)
     end
 end
 
+local function AnchorPlayer()
+    ReplicatedStorage.Remotes.ToggleAsset:InvokeServer(49491808)
+    local backpack = LocalPlayer:WaitForChild("Backpack", 2)
+    local Character = LocalPlayer.Character
+    local Humanoid = Character:WaitForChild("Humanoid", 2)
+    local Tool = backpack:WaitForChild("StaffOfPitFire", 2)
+    if Tool then
+        Humanoid:EquipTool(Tool)
+        task.wait()
+        if Tool.Parent == Character then
+            Tool:Activate()
+        end
+        ReplicatedStorage.Remotes.ToggleAsset:InvokeServer(49491808)
+    end
+end
 
 local destroyList = { ["Rocket"] = true, ["Explosion"] = true }
 local function processCommands(UserID, str)
-    local Roocketconnection = nil
+    local Rocketconnection = nil
     local PlatformConnection = nil
+    local AnchorConnection = nil
     local uncleanedstring = str
     local Chatter = Players:GetPlayerByUserId(UserID)
     local lowerstring = uncleanedstring:lower()
@@ -851,8 +867,31 @@ local function processCommands(UserID, str)
         end
     elseif command == "antiplatform" then --may not work very expermential
         if PlatformConnection then return end
-
-    elseif command == "unantiplatform" then 
+        PlatformConnection = RunService.Heartbeat:Connect(function()
+            for i, v in pairs(Players:GetPlayers()) do
+                task.spawn(function()
+                    if v ~= LocalPlayer then
+                        pcall(function()
+                            local char = v.Character
+                            local root = char:FindFirstChild("HumanoidRootPart")
+                            root.Size = Vector3.new(100, 100, 100)
+                            root.CanCollide = false
+                        end)
+                    end
+                end)
+            end
+        end)
+    elseif command == "anchor" then
+        if AnchorConnection then return end
+        AnchorPlayer()
+        AnchorConnection = LocalPlayer.CharacterAdded:Connect(function(v)
+            AnchorPlayer()
+        end)
+    elseif command == "unanchor" then
+        if not AnchorConnection then return end
+        AnchorConnection:Disconnect()
+        AnchorConnection = nil
+    elseif command == "unantiplatform" then
         if not PlatformConnection then return end
         PlatformConnection:Disconnect()
         PlatformConnection = nil
@@ -862,7 +901,6 @@ local function processCommands(UserID, str)
         equiptoolandColor("CloverHammer")
     elseif command == "gold" then
         equiptoolandColor("2018BloxyAward")
-
     elseif command == "kill" then
         local targets = FindPlayers(Chatter, split[2])
         if not targets then return end
@@ -928,16 +966,16 @@ local function processCommands(UserID, str)
             forLoopForList(targets, RemoveFromList, saveList)
         end
     elseif command == "removerockets" then
-        Roocketconnection = Workspace.ChildAdded:Connect(function(v)
+        Rocketconnection = Workspace.ChildAdded:Connect(function(v)
             if destroyList[v.Name] then
                 task.wait()
                 v:Remove()
             end
         end)
     elseif command == "unremoverockets" then
-        if Roocketconnection then
-            Roocketconnection:Disconnect()
-            Roocketconnection = nil
+        if Rocketconnection then
+            Rocketconnection:Disconnect()
+            Rocketconnection = nil
         end
     elseif command == "loopexplode" then
         local targets = FindPlayers(Chatter, split[2])
@@ -1067,7 +1105,7 @@ if game.PlaceId == 26838733 then
     ToggleAsset(173755801)  --Diamond-Blade-Sword
     ToggleAsset(169602103)  -- Seranoks-Rocket-Jumper
     ToggleAsset(106064277)  --cupid blade
-    ToggleAsset(108153884)  --lucky hammer
+    --ToggleAsset(108153884)  --lucky hammer
     ToggleAsset(1469987740) -- bloxxy 1018
     ToggleAsset(53623322)   -- sorcus sword
     ToggleAsset(212641536)  -- boombox
