@@ -9,7 +9,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMa
 
 To use the outdated obfuscated script it have to be like this, but it prints out weird stuff because I think is funny but you can ignore it.
 
-getgenv().Prefix = "!"
+getgenv().Prefix = "!";
 loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Main.lua))()
 
 You see that they perform similar in terms of functionality. I am still mad at myself for leaking the source code. Somebody having my source code is fine but when they are stealing my credit, it fuels me with anger. Now that I fininshed my rant, I can hopefully sleep now.
