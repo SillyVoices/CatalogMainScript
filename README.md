@@ -14,4 +14,4 @@ To use the outdated obfuscated script it have to be like this, but it prints out
 getgenv().Prefix = "!";
 loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Main.lua))()
 
-If you tried to execute both script you can see that they perform similar in terms of functionality.
+If you tried to execute both script you can see that they perform similar in terms of functionality which hopefully proofs that I am the creator of the script.
