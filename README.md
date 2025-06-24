@@ -11,10 +11,3 @@ I am still mad at myself for leaking the source code. Somebody having my source 
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-To use the outdated obfuscated script it have to be like this, but it prints out weird stuff because I think is funny but you can ignore it.
-
-getgenv().Prefix = "!";
-loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Obfuscated.lua))()
-
-If you tried to execute both script you can see that they perform similar in terms of functionality which hopefully proofs that I am the creator of the script, plus the youtube video which I have showcased which is way earlier than any script sighting.
