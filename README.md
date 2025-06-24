@@ -5,7 +5,7 @@ for the unobfuscated script you can execute by copy and pasting the script in to
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Unobfuscated.lua"))()
 
-To use the obfuscated script it have to be like this
+To use the obfuscated script it have to be like this, it prints out weird stuff because I think is funny but you can ignore it.
 
 getgenv().Prefix = "!"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Main.lua))()
