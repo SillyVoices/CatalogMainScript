@@ -1,7 +1,7 @@
 This is my catalog heaven admin script unobfuscated.lua is the one that is the most recent verison I made; but I screwed up and end up leaking the source code.
 
 
-for the unobfuscated script you can execute by copy the Unobfuscated.lua's content and pasting the script in to your executor, or you can execute it with loadstring.
+for the unobfuscated script you can execute by copy the Unobfuscated.lua's content and pasting the script in to your executor, or you can execute it with loadstring. --June 24 smh I relapsed and played catalog heaven, I really need to quit this game.
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Unobfuscated.lua"))()
 
