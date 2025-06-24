@@ -1,1 +1,1 @@
-This is a obfuscated catalog heaven admin script
+This is my catalog heaven admin script
