@@ -10,8 +10,8 @@ Commands includes speed, killaura, unkillaura, antiplatform, unantiplatform, pin
 Some commands like antiplatform or gold does not require any addictional arguments.
 Antiplatform is very experimental; may not work as intended.
 Any bugs you will encounter will not be fix as I will be leaving Catalog Heaven.
-It should be running fine without any errors as I have alot of pcalls in the script.
-This script is not made by AI If I actually used ai the varible names will make much more sense, like ameChan for example, It is a reference from needystreamer overload.
+It should be running fine without any errors as I have alot of pcalls, plus I tested it out, if it errors out, blame roblox for breaking pcall.
+
 
 I am still mad at myself for leaking the source code. Somebody having my source code is fine but when they are stealing my credit, it fuels me with anger. Now that I fininshed my rant, I can hopefully sleep now.
 
