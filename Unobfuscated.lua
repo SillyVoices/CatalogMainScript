@@ -358,23 +358,6 @@ local function GetHadesStaffSnowFlake()
     return something
 end
 
---[[local function shootPlatformShooter()
-    local Character = game.Players.LocalPlayer.Character
-    local Backpack = game.Players.LocalPlayer.Backpack
-    if not (Character and Backpack) then return end
-    local PlatformGun = Backpack:FindFirstChild("StepGun") or Character:FindFirstChild("StepGun")
-    if not PlatformGun then return end
-    local ShootEvent = PlatformGun:FindFirstChildOfClass("RemoteEvent")
-    if not ShootEvent then return end
-    PlatformGun.Parent = Character
-    local torso = Character:FindFirstChild("Torso") or Backpack:FindFirstChild("UpperTorso")
-    local shootPosition = torso.Position + Vector3.new(0,2,0)+ (torso.CFrame.LookVector * 4)
-    ShootEvent:FireServer(shootPosition)
-end
-
-shootPlatformShooter()]] --
-
-
 local function PlatformKill(plr)
     local Char, Backpack, PlatformGun, ShootEvent = getPlatformShooter()
     if (not (Char and Backpack and PlatformGun and ShootEvent) or PlatformCooldown) then return end
@@ -437,29 +420,6 @@ local function kill(table)
         end)
     end
 end
-
---[[local function RemoveRootOtherForOtherPlayers(List)
-    if #List == 0 then return end
-    for i = 1, #List do
-        task.spawn(function()
-            local plr = List[i]
-            local char = plr.Character
-            if not char then return end
-        end)
-    end
-end
-
-local me = game.Players.LocalPlayer.Character
-local gear = me:FindFirstChildOfClass("Tool")
-local handle = gear:FindFirstChild("Handle")
-local badguy = workspace:FindFirstChild("AccForStudio12")
-local root = badguy:FindFirstChild("HumanoidRootPart")
-gear:Activate()
-task.wait()
-firetouchinterest(root, handle, 0)
-firetouchinterest(root, handle, 1)
-
-]] --
 
 local function damage(dmg, targets)
     local _damage = num(dmg)
@@ -1113,6 +1073,6 @@ end
 
 StarterGui:SetCore("SendNotification", {
     Title = "Script Loaded!",
-    Text = "Made by AliceLiddel.",
+    Text = "I'm so silly :3",
     Duration = 5,
 })
