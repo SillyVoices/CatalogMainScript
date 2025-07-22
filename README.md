@@ -20,3 +20,6 @@ I am still mad at myself for leaking the source code. Somebody having my source 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 This is my second attempt at making an Catalog Heaven Admin script, the first one I made is made with AI so I do not understand the script is doing thus I remade it. This script is very much of an improvement now as you can now call "me" or "others" in the targetplayer argument.
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+AmeChan is a reference from Ame-Chan from needy Streamer overload which is my persona!
