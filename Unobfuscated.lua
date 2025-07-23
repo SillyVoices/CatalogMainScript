@@ -25,7 +25,6 @@ local baseProtect          = {}
 local killAuraList         = {}
 local creator              = true
 local publicMode           = false
-local HttpRequest          = syn and syn.request or http and http.request or http_request or request or httprequest
 local chatCooldown         = false
 local nan                  = 0 / 0
 local ImportantPlayerParts = {
