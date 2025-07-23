@@ -20,11 +20,13 @@ Platform kill and blind is buggy; may lead to crashes if the part is deleted by 
 # My method to "fight" other scripters
 step 1 !loopgod me
 
-step 2 !anchor --It trys to anchor as soon as you spawns
+step 2 !anchor -- It trys to anchor as soon as you spawns.
 
-step 3 !loopkill targetPlayer
+step 3 !antiplatform -- Weakends the platform attack from the opponent.
 
-step 4 AFK and hope the other player rage quits! --better have anti afk script lol
+step 4 !loopkill targetPlayer
+
+step 5 AFK and hope the other player rage quits! --better have anti afk script lol
 
 # My rant
 This is my catalog heaven admin script unobfuscated.lua is the one that is the most recent verison I made; but I screwed up and end up leaking the source code.
