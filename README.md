@@ -5,9 +5,11 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMa
 The default prefix is "!" and you can change it by editing the prefix varible. Script usage examples: !loopkill all, !speed others 100.
 
 # Commands
-Commands includes speed, killaura, unkillaura, antiplatform, unantiplatform, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, anchor.
+speed, killaura, unkillaura, antiplatform, unantiplatform, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, anchor.
 
-Target includes me, all, others, hackers, playerName, playerDisplayName. 
+# Targets
+me, all, others, hackers, PlayerName/DisplayName. 
+
 # Notes
 My targeting system will check every player's name and displayName and return all matches and may lead you to kill an unexpected victim that match the criteria.
 Some commands like antiplatform or gold does not require any addictional arguments.
