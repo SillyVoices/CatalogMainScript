@@ -15,6 +15,7 @@ Note that the speed command is very buggy.
 Antiplatform is very experimental; may not work as intended.
 Any bugs you will encounter will not be fixed as I will be leaving Catalog Heaven.
 It should be running fine without any errors as I have alot of pcalls, also I tested it, if it errors out, blame roblox for breaking pcall.
+Platform kill and blind is buggy; may lead to crashes if the part is deleted by base forcefield before anything happend.
 
 # My rant
 This is my catalog heaven admin script unobfuscated.lua is the one that is the most recent verison I made; but I screwed up and end up leaking the source code.
@@ -27,4 +28,5 @@ This is my second attempt at making an Catalog Heaven Admin script, the first on
 
 AmeChan is a reference from Ame-Chan from needy Streamer overload which is my persona! --Is to prevent it from excuting twice~!
 
-Platform kill and blind is buggy; may lead to crashes if the part is deleted by base forcefield before anything happend.
+The made by Alice Liddel is a Black Souls reference, which is a very interesting game! (DONT SEARCH IT UP)
+
