@@ -17,9 +17,6 @@ It should be running fine without any errors as I have alot of pcalls, also I te
 
 I am still mad at myself for leaking the source code. Somebody having my source code is fine but when they are stealing my credit, it fuels me with anger. Now that I fininshed my rant, I can hopefully sleep now.
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 This is my second attempt at making an Catalog Heaven Admin script, the first one I made is made with AI so I do not understand the script is doing thus I remade it. This script is very much of an improvement now as you can now call "me" or "others" in the targetplayer argument.
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 AmeChan is a reference from Ame-Chan from needy Streamer overload which is my persona!
