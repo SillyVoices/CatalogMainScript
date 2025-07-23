@@ -19,8 +19,11 @@ Platform kill and blind is buggy; may lead to crashes if the part is deleted by 
 
 # My method to "fight" other scripters
 step 1 !loopgod me
+
 step 2 !anchor --It trys to anchor as soon as you spawns
+
 step 3 !loopkill targetPlayer
+
 step 4 AFK and hope the other player rage quits! --better have anti afk script lol
 
 # My rant
