@@ -7,10 +7,10 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMa
 
 Commands includes speed, killaura, unkillaura, antiplatform, unantiplatform, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, anchor.
 
-Target includes me, all, others, hackers, playerName, playerDisplayName. Playertargets will get autofilled and will return all matches and may lead you to kill an unexpected victim that match the criteria.
-
+Target includes me, all, others, hackers, playerName, playerDisplayName. 
 # Notes
 
+My targeting system will check every player's name and displayName and return all matches and may lead you to kill an unexpected victim that match the criteria.
 Some commands like antiplatform or gold does not require any addictional arguments.
 Antiplatform is very experimental; may not work as intended.
 Any bugs you will encounter will not be fixed as I will be leaving Catalog Heaven.
