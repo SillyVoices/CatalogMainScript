@@ -68,7 +68,6 @@ local function num(str)
     end
 end
 
-
 local function healthmorethan0(humanoid)
     return humanoid and (humanoid.Health > 0 or humanoid.Health ~= humanoid.Health) or false
 end
@@ -91,6 +90,32 @@ local function FindPlayers(Me, input)
                 table.insert(Loosers, plr)
             end
         end
+    elseif target == "blacks" or target == "colored" then
+        for i = 1, #allplayers do
+            pcall(function()
+                local plr = allplayers[i]
+                local char = plr.Character
+                local head = char:FindFirstChild("Head")
+                if head then
+                    local headColor = head.Color
+                    local r = headColor.R * 255
+                    local g = headColor.G * 255
+                    local b = headColor.B * 255
+                    if not (r > 200 and g > 80 and b > 10) then --Targets darker skin tone including brown and black.
+                        table.insert(Loosers, plr)
+                    end
+                end
+            end)
+        end
+    elseif target == "bacons" then
+        for i = 1, #allplayers do
+            local plr = allplayers[i]
+            local char = plr.Character
+            local condiction = char:FindFirstChild("Pal Hair")
+            if condiction then
+                table.insert(Loosers, plr)
+            end
+        end
     elseif target == "nonhackers" then
         for i = 1, #allplayers do
             local plr = allplayers[i]
@@ -104,11 +129,9 @@ local function FindPlayers(Me, input)
         for i = 1, #allplayers do
             local plr = allplayers[i]
             local char = plr.Character
-            if char then
-                local ff = char:FindFirstChild("ForceField")
-                if ff then
-                    table.insert(Loosers, plr)
-                end
+            local condiction = char:FindFirstChild("ForceField")
+            if condiction then
+                table.insert(Loosers, plr)
             end
         end
     elseif target == "others" then
@@ -279,9 +302,10 @@ local function RemoveFromList(List, Thing)
     table.remove(List, index)
 end
 
+
 local korbloxEquipped = false
 
-local function equiptKorbloxAndKill()
+local function equipKorbloxAndKill()
     if not korbloxEquipped and #FFkillList == 0 then return end
     if korbloxEquipped and #FFkillList == 0 then
         local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -548,7 +572,7 @@ local function MainLoop()
             nanHealth(saveList)
         end)
         task.spawn(function()
-            equiptKorbloxAndKill()
+            equipKorbloxAndKill()
         end)
         task.spawn(function()
             fireRocket(RocketList)
@@ -556,9 +580,23 @@ local function MainLoop()
     end)
 end
 
+
+local function getGearFromCatalog(gearId,gearName) --unused 
+    local character,backpack = GetCharacterAndBackpack()
+    local foundedgear = nil
+    repeat task.wait(0.1)
+    local gear = character:FindFirstChild(gearName) or backpack:FindFirstChild(gearName)
+    if gear then
+        foundedgear = gear
+    else
+    ReplicatedStorage.Remotes.ToggleAsset(gearId)
+    end
+    until gear or character == nil
+    return foundedgear
+end
+
 local function equiptool(n)
-    local mychar = LocalPlayer.Character
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    local mychar,backpack = GetCharacterAndBackpack()
     if not mychar then return end
     local humanoid = mychar:FindFirstChildOfClass("Humanoid")
     if not humanoid then return end
@@ -719,18 +757,20 @@ local function findValueOfIndex(index, table)
     end
     return ans
 end
+
 local MusicList = { ["Alkline Tears"] = 73718692864423 }
 
-local function functiontoPlayMusic(songid)
+
+local function playMusic(songid)
     pcall(function()
         local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         if not Character then return end
-        local backpack = LocalPlayer.Backpack
+        local backpack = LocalPlayer:WaitForChild("Backpack",5)
         if not backpack then return end
         local boombox = backpack:WaitForChild("SuperFlyGoldBoombox", 5)
         if not boombox then return end
         boombox.Parent = Character
-        Character.SuperFlyGoldBoombox.Remote:FireServer("PlaySong", songid)
+        Character.SuperFlyGoldBoombox.Remote:FireServer("PlaySong", tonumber(songid))
         boombox.DescendantAdded:wait()
         task.wait()
         boombox.Parent = backpack
@@ -744,7 +784,7 @@ end
 local function playRandomMusic()
     local randomNum = math.random(1, CountMap(MusicList))
     SoundIDtoPlay = findValueOfIndex(randomNum, MusicList)
-    functiontoPlayMusic(SoundIDtoPlay)
+    playMusic(SoundIDtoPlay)
     print("playing " .. SoundIDtoPlay)
 end
 
@@ -826,7 +866,7 @@ local function processCommands(UserID, str)
     elseif command == "antiplatform" then --may not work very expermential
         if PlatformConnection then return end
         PlatformConnection = RunService.Heartbeat:Connect(function()
-            for i, v in pairs(Players:GetPlayers()) do
+            for _, v in pairs(Players:GetPlayers()) do
                 task.spawn(function()
                     if v ~= LocalPlayer then
                         pcall(function()
@@ -839,13 +879,13 @@ local function processCommands(UserID, str)
                 end)
             end
         end)
-    elseif command == "anchor" then
+    elseif command == "startanchor" then
         if AnchorConnection then return end
         AnchorPlayer()
         AnchorConnection = LocalPlayer.CharacterAdded:Connect(function(v)
             AnchorPlayer()
         end)
-    elseif command == "unanchor" then
+    elseif command == "stopanchor" then
         if not AnchorConnection then return end
         AnchorConnection:Disconnect()
         AnchorConnection = nil
@@ -868,7 +908,13 @@ local function processCommands(UserID, str)
         if not targets then return end
         nanHealth(targets)
     elseif command == "playmusic" or command == "play" then
-        playRandomMusic()
+        pcall(function ()
+        if split[2] then
+        playMusic(split[2])
+        else
+            playRandomMusic()
+        end
+        end)
     elseif command == "explode" then
         local targets = FindPlayers(Chatter, split[2])
         if not targets then return end
@@ -1054,19 +1100,21 @@ print("finished connecting!")
 
 if game.PlaceId == 26838733 then
     if creator then
-        --ReplicatedStorage.Remotes.BecomeAvatar:FireServer("1967676620")
+        --ReplicatedStorage.Remotes.BecomeAvatar:FireServer("1967676620") --for the cool avatar!
     end
     task.wait(1)
     ToggleAsset(34898883)   --Positronic-Platform-Producer
-    ToggleAsset(69210321)   --Hades-Staff-of-Darkness-A-Gamestop-Exclusive
     ToggleAsset(68539623)   --Korblox-Sword-and-Shield
     ToggleAsset(173755801)  --Diamond-Blade-Sword
     ToggleAsset(169602103)  -- Seranoks-Rocket-Jumper
+    --[[
+    ToggleAsset(69210321)   --Hades-Staff-of-Darkness-A-Gamestop-Exclusive
     ToggleAsset(106064277)  --cupid blade
-    --ToggleAsset(108153884)  --lucky hammer
+    ToggleAsset(108153884)  --lucky hammer
     ToggleAsset(1469987740) -- bloxxy 1018
     ToggleAsset(53623322)   -- sorcus sword
     ToggleAsset(212641536)  -- boombox
+    ]]--
 end
 
 StarterGui:SetCore("SendNotification", {
