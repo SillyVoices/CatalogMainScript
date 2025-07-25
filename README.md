@@ -8,7 +8,7 @@ The default prefix is "!" and you can change it by editing the prefix varible. S
 speed, killaura, unkillaura, antiplatform, unantiplatform, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, anchor.
 
 # Targets
-me, all, others, hackers, PlayerName/DisplayName. 
+me, all, others, hackers, PlayerName/DisplayName, bacons. 
 
 # Notes
 My targeting system will check every player's name and displayName and return all matches and may lead you to kill an unexpected victim that match the criteria.
