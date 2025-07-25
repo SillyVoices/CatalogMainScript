@@ -1,5 +1,5 @@
 # Script
-loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMainScript/main/Unobfuscated.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/SillyVoices/CatalogMainScript/main/Unobfuscated.lua"))()
 
 # Usage
 The default prefix is "!" and you can change it by editing the prefix varible. Script usage examples: !loopkill all, !speed others 100.
