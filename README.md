@@ -28,7 +28,7 @@ step 3 !antiplatform -- Weakends the platform attack from the opponent.
 
 step 4 !loopkill targetPlayer
 
-step 5 AFK and hope the other player rage quits! --better have anti afk script lol
+step 5 AFK and hope the other player rage quits! 
 
 # My rant
 This is my catalog heaven admin script unobfuscated.lua is the one that is the most recent verison I made; but I screwed up and end up leaking the source code.
