@@ -1107,13 +1107,14 @@ if game.PlaceId == 26838733 then
     ToggleAsset(68539623)   --Korblox-Sword-and-Shield
     ToggleAsset(173755801)  --Diamond-Blade-Sword
     ToggleAsset(169602103)  -- Seranoks-Rocket-Jumper
-    --[[
     ToggleAsset(69210321)   --Hades-Staff-of-Darkness-A-Gamestop-Exclusive
+    ToggleAsset(53623322)   -- sorcus sword
+
+    --[[
+    ToggleAsset(212641536)  -- boombox
     ToggleAsset(106064277)  --cupid blade
     ToggleAsset(108153884)  --lucky hammer
     ToggleAsset(1469987740) -- bloxxy 1018
-    ToggleAsset(53623322)   -- sorcus sword
-    ToggleAsset(212641536)  -- boombox
     ]]--
 end
 
