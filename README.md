@@ -5,7 +5,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/SillySlices/CatalogMa
 The default prefix is "!" and you can change it by editing the prefix varible. Script usage examples: !loopkill all, !speed others 100.
 
 # Commands
-speed, killaura, unkillaura, antiplatform, unantiplatform, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, anchor.
+speed, killaura, unkillaura, antiplatform, unantiplatform, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, startanchor, stopanchor.
 
 # Targets
 me, all, others, hackers, PlayerName/DisplayName, bacons. 
@@ -22,7 +22,7 @@ Platform kill and blind is buggy; may lead to crashes if the part is deleted by 
 # My method to "fight" other scripters
 step 1 !loopgod me
 
-step 2 !anchor -- It trys to anchor as soon as you spawns.
+step 2 !startanchor -- It trys to anchor as soon as you spawns.
 
 step 3 !antiplatform -- Weakends the platform attack from the opponent.
 
