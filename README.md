@@ -29,7 +29,9 @@ step 3 !antiplatform -- Weakends the platform attack from the opponent.
 step 4 !loopkill targetPlayer
 
 step 5 AFK and hope the other player rage quits! 
-
+# Known bugs
+crashes the player if you use the blind command and the blind snowflake some how get destroyed
+Attempts to korblox while anchored
 # My rant
 This is my catalog heaven admin script unobfuscated.lua is the one that is the most recent verison I made; but I screwed up and end up leaking the source code.
 
