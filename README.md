@@ -36,7 +36,11 @@ Attempts to korblox while anchored
 
 # Yes, I made this script
 
-Nobody believe me for some reason
+Nobody believes me for some reason. :c
+
+# I am getting older sadly so one day I will quit this game for real 
+
+Maintaining this script is one of my hobbies, so they will be frequent updates.
 
 # My rant
 
