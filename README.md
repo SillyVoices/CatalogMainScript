@@ -33,6 +33,11 @@ step 5 AFK and hope the other player rage quits!
 crashes the player if you use the blind command and the blind snowflake some how get destroyed
 
 Attempts to korblox while anchored
+
+# Yes, I made this script
+
+Nobody believe me for some reason
+
 # My rant
 
 Everyone in Catalog Heaven Hates me!!!!!!!!! I dont care any more. -- July 27 2025
