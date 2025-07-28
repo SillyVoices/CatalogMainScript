@@ -5,7 +5,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/SillyVoices/CatalogMa
 The default prefix is "!" and you can change it by editing the prefix varible. Script usage examples: !loopkill all, !speed others 100.
 
 # Commands
-speed, killaura, unkillaura, antiplatform, unantiplatform, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, startanchor, stopanchor.
+speed, killaura, unkillaura, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, startanchor, stopanchor.
 
 # Targets
 me, all, others, hackers, PlayerName/DisplayName, bacons. 
@@ -23,8 +23,6 @@ Platform kill and blind is buggy; may lead to crashes if the part is deleted by 
 step 1 !loopgod me -- It trys to make your health to math.huge.
 
 step 2 !startanchor -- It trys to anchor as soon as you spawns.
-
-step 3 !antiplatform -- Weakends the platform attack from the opponent.
 
 step 4 !loopkill targetPlayer
 
