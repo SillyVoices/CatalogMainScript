@@ -22,10 +22,12 @@ local RocketList           = {}
 local loopkillRejoinProof  = {}
 local baseProtect          = {}
 local killAuraList         = {}
-local creator              = true
-local publicMode           = false
+local LegacyKillMethod     = true  --this makes the script more stable and reduces crashes
+local creator              = true  --this gives cool avatar
+local publicMode           = false --this makes that everyone can use your commands
 local chatCooldown         = false
 local nan                  = 0 / 0
+local anchorWhenRespawn    = false
 local ImportantPlayerParts = {
     Head = true,
     Torso = true,
@@ -68,7 +70,7 @@ local function num(str)
     end
 end
 
-local function healthmorethan0(humanoid)
+local function isAlive(humanoid)
     return humanoid and (humanoid.Health > 0 or humanoid.Health ~= humanoid.Health) or false
 end
 
@@ -184,6 +186,138 @@ local function GetCharacterAndBackpack()
     return Character, Backpack
 end
 
+local function cleanball()
+    for _, part in pairs(Workspace:GetChildren()) do
+        if part.Name == "Part" then
+            local sound = part:FindFirstChild("HoHoHo")
+            if sound then
+                part:Destroy()
+            end
+        end
+    end
+end
+
+
+local function RemoveFromList(List, Thing)
+    local index = table.find(List, Thing)
+    if not index then return end
+    table.remove(List, index)
+end
+
+
+local function cleantouch(character)
+    local tool = character:FindFirstChildOfClass("Tool")
+    if not tool then return end
+    local handle = tool:FindFirstChild("Handle")
+    if not handle then return end
+    local touch = handle:FindFirstChild("TouchInterest")
+    if not touch then return end
+    touch:Destroy()
+end
+
+local function Legacykorblox()
+    if #FFkillList == 0 then return end
+    local storage = LocalPlayer:FindFirstChild("Backpack")
+    local character = LocalPlayer.Character
+    if not character then return end
+    local Humanoid = character:FindFirstChild("Humanoid")
+    if not Humanoid then return end
+    local hp = Humanoid.Health
+    local myTorso = character:FindFirstChild("Torso")
+    if not myTorso then return end
+    local sword = storage:FindFirstChild("KorbloxSwordAndShield") or character:FindFirstChild("KorbloxSwordAndShield")
+    if not sword then return end
+    if sword.Parent == storage then
+        sword.Parent = character
+    end
+    task.spawn(function() cleanball() end)
+    for index, char in pairs(FFkillList) do
+        task.spawn(function()
+            local targetTorso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+            local targetHumanoid = char:FindFirstChild("Humanoid")
+            if not (character and Humanoid and hp and myTorso and sword and char and targetTorso) then return end
+            if isAlive(targetHumanoid) then
+                if sword.Parent == character then
+                    task.spawn(function()
+                        for _, v in pairs(char:GetChildren()) do
+                            if v:IsA("BasePart") then
+                                task.spawn(function() cleantouch(char) end)
+                                task.spawn(function() v.Anchored = true end)
+                                task.spawn(function()
+                                    v.CFrame = myTorso.CFrame * CFrame.new(Vector3.new(1.5, 3.5, -1.8)) *
+                                        CFrame.Angles(math.rad(90), 0, 0)
+                                end)
+                            end
+                        end
+                    end)
+                end
+            else
+                RemoveFromList(FFkillList, char)
+            end
+        end)
+        pcall(function()
+            if hp > 0 or hp ~= hp then
+                sword:Activate()
+            end
+        end)
+    end
+end
+
+local function TouchAndUnTouch(PartToTouch, MyTouchTransmitter)
+    task.spawn(function()
+        pcall(function()
+            if not (PartToTouch and MyTouchTransmitter) then return end
+            firetouchinterest(PartToTouch, MyTouchTransmitter, 0)
+            task.wait()
+            if not (PartToTouch and MyTouchTransmitter) then return end
+            firetouchinterest(PartToTouch, MyTouchTransmitter, 1)
+        end)
+    end)
+end
+
+local korbloxEquipped = false
+
+local function equipKorbloxAndKill()
+    if not korbloxEquipped and #FFkillList == 0 then return end
+    if korbloxEquipped and #FFkillList == 0 then
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        local mychar = LocalPlayer.Character
+        if not (backpack and mychar) then return end
+        local korblox = mychar:FindFirstChild("KorbloxSwordAndShield")
+        if korblox then
+            korblox.Parent = backpack
+            korbloxEquipped = false
+        end
+        return
+    end
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    local mychar = LocalPlayer.Character
+    if not (backpack and mychar) then return end
+    local korblox = backpack:FindFirstChild("KorbloxSwordAndShield") or mychar:FindFirstChild("KorbloxSwordAndShield")
+    if not korblox then return end
+    local handle = korblox:FindFirstChild("Handle")
+    if not handle then return end
+    korblox.Parent = mychar
+    korbloxEquipped = true
+    task.spawn(function()
+        for i = 1, #FFkillList do
+            task.spawn(function()
+                local target = FFkillList[i]
+                local TheirHumanoid = target and target:FindFirstChildOfClass("Humanoid")
+                if (TheirHumanoid.Health == 0 or target == nil) then
+                    RemoveFromList(FFkillList, target)
+                    return
+                end
+                for _, v in pairs(target:GetChildren()) do
+                    if v:IsA("BasePart") and korblox.Parent == mychar and handle then
+                        TouchAndUnTouch(v, handle)
+                    end
+                end
+            end)
+        end
+    end)
+end
+
 local function GetDiamondRemote()
     local char, backpack = GetCharacterAndBackpack()
     if not (char and backpack) then return end
@@ -211,17 +345,7 @@ if not success then
 end
 
 
-local function TouchAndUnTouch(PartToTouch, MyTouchTransmitter)
-    task.spawn(function()
-        pcall(function()
-            if not (PartToTouch and MyTouchTransmitter) then return end
-            firetouchinterest(PartToTouch, MyTouchTransmitter, 0)
-            task.wait()
-            if not (PartToTouch and MyTouchTransmitter) then return end
-            firetouchinterest(PartToTouch, MyTouchTransmitter, 1)
-        end)
-    end)
-end
+
 
 local function infhp(table)
     if #table == 0 then return end
@@ -283,7 +407,7 @@ local function fireRocket(List)
             local head = char:FindFirstChild("Head")
             if not head then return end
             local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if not healthmorethan0(humanoid) then return end
+            if not isAlive(humanoid) then return end
             local StartingPosition = head.Position
             RocketRemoteEvent:FireServer(StartingPosition - Vector3.new(0, 1, 0), StartingPosition)
         end)
@@ -294,56 +418,6 @@ local function insertToList(list, v)
     local index = table.find(list, v)
     if index then return end
     table.insert(list, v)
-end
-
-local function RemoveFromList(List, Thing)
-    local index = table.find(List, Thing)
-    if not index then return end
-    table.remove(List, index)
-end
-
-
-local korbloxEquipped = false
-
-local function equipKorbloxAndKill()
-    if not korbloxEquipped and #FFkillList == 0 then return end
-    if korbloxEquipped and #FFkillList == 0 then
-        local backpack = LocalPlayer:FindFirstChild("Backpack")
-        local mychar = LocalPlayer.Character
-        if not (backpack and mychar) then return end
-        local korblox = mychar:FindFirstChild("KorbloxSwordAndShield")
-        if korblox then
-            korblox.Parent = backpack
-            korbloxEquipped = false
-        end
-        return
-    end
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    local mychar = LocalPlayer.Character
-    if not (backpack and mychar) then return end
-    local korblox = backpack:FindFirstChild("KorbloxSwordAndShield") or mychar:FindFirstChild("KorbloxSwordAndShield")
-    if not korblox then return end
-    local handle = korblox:FindFirstChild("Handle")
-    if not handle then return end
-    korblox.Parent = mychar
-    korbloxEquipped = true
-    task.spawn(function()
-        for i = 1, #FFkillList do
-            task.spawn(function()
-                local target = FFkillList[i]
-                local TheirHumanoid = target and target:FindFirstChildOfClass("Humanoid")
-                if (TheirHumanoid.Health == 0 or target == nil) then
-                    RemoveFromList(FFkillList, target)
-                    return
-                end
-                for _, v in pairs(target:GetChildren()) do
-                    if v:IsA("BasePart") and korblox.Parent == mychar and handle then
-                        TouchAndUnTouch(v, handle)
-                    end
-                end
-            end)
-        end
-    end)
 end
 
 local function GetStickeyStep()
@@ -380,7 +454,10 @@ local function GetHadesStaffSnowFlake()
     return something
 end
 
-local function PlatformKill(plr)
+PlatformCoolDown = false
+
+
+local function TouchInterestPlatformKill(plr)
     local Char, Backpack, PlatformGun, ShootEvent = getPlatformShooter()
     if (not (Char and Backpack and PlatformGun and ShootEvent) or PlatformCooldown) then return end
     if PlatformGun.Parent == Backpack then
@@ -410,19 +487,51 @@ local function PlatformKill(plr)
     end)
 end
 
+function LegacyPlatformKill(plr)
+    local Char, Backpack, PlatformGun, ShootEvent = getPlatformShooter()
+    if (not (Char and Backpack and PlatformGun and ShootEvent) or PlatformCooldown) then return end
+    local myTorso = Char:FindFirstChild("UpperTorso") or Char:FindFirstChild("Torso")
+    local targetCharacter = plr.Character
+    local targetTorso = targetCharacter:FindFirstChild("UpperTorso") or targetCharacter:FindFirstChild("Torso")
+    if not targetTorso then return end
+    local targetHead = targetCharacter:FindFirstChild("Head")
+    if not targetHead then return end
+    local targetPosition = myTorso.Position + Vector3.new(0, 15, 10) + (myTorso.CFrame.LookVector * 4)
+    task.spawn(function()
+        targetHead.CanCollide = false
+        targetHead.Anchored = true
+        targetHead.Size = Vector3.new(50, 50, 50)
+        targetHead.Transparency = 1
+        targetTorso.CFrame = CFrame.new(targetPosition)
+        targetHead.CFrame = CFrame.new(targetPosition)
+    end)
+    if PlatformGun.Parent == Backpack then
+        PlatformGun.Parent = Char
+    end
+    ShootEvent:FireServer(targetTorso.Position)
+    if PlatformGun.Parent == Char then
+        PlatformGun.Parent = Backpack
+    end
+    task.spawn(function()
+        PlatformCoolDown = true
+        task.wait(0.5)
+        PlatformCoolDown = false
+    end)
+end
+
 local function IsGodMode(Character)
     local Humanoid = Character:FindFirstChildOfClass("Humanoid")
     return (Character:FindFirstChild("ForceField") or Humanoid.Health ~= Humanoid.Health or Humanoid.Health == math.huge or Character:FindFirstChild("DragonSword&Shield"))
 end
 
-local function TorsoOrHeadAnchored(Character)
+local function TorsoAnchored(Character)
     local theirTorso = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
-    local head = Character:FindFirstChild("Head")
-    return (theirTorso.Anchored or head.Anchored)
+    return (theirTorso and theirTorso.Anchored or Character:FindFirstChild("DrumKit") ~= nil)
 end
 
 local function kill(table)
     if #table == 0 then return end
+    pcall(function()
     local remote = GetDiamondRemote()
     for i = 1, #table do
         task.spawn(function()
@@ -430,17 +539,22 @@ local function kill(table)
             local Character = target and target.Character
             if not (target and remote and Character) then return end
             local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-            if healthmorethan0(Humanoid) then
+            if isAlive(Humanoid) then
                 remote:InvokeServer(7, Humanoid, math.huge)
                 if not IsGodMode(Character) or target == LocalPlayer then return end
-                if not TorsoOrHeadAnchored(Character) then
-                    PlatformKill(target)
-                else
+                if TorsoAnchored(Character) then
                     insertToList(FFkillList, Character)
+                else
+                    if LegacyKillMethod then
+                        LegacyPlatformKill(target)
+                    else
+                        TouchInterestPlatformKill(target)
+                    end
                 end
             end
         end)
     end
+    end)
 end
 
 local function damage(dmg, targets)
@@ -560,6 +674,8 @@ local function baseProtectfun(myPlayer)
     end
 end
 
+
+
 local function MainLoop()
     pcall(function()
         task.spawn(function()
@@ -572,7 +688,11 @@ local function MainLoop()
             nanHealth(saveList)
         end)
         task.spawn(function()
-            equipKorbloxAndKill()
+            if LegacyKillMethod then
+                Legacykorblox()
+            else
+                equipKorbloxAndKill()
+            end
         end)
         task.spawn(function()
             fireRocket(RocketList)
@@ -580,23 +700,26 @@ local function MainLoop()
     end)
 end
 
+local ColorNameIdTable = { ["Diamond Blade Sword"] = 173755801 }
 
-local function getGearFromCatalog(gearId,gearName) --unused 
-    local character,backpack = GetCharacterAndBackpack()
+
+local function getGearFromCatalog(gearId, gearName) --unused
+    local character, backpack = GetCharacterAndBackpack()
     local foundedgear = nil
-    repeat task.wait(0.1)
-    local gear = character:FindFirstChild(gearName) or backpack:FindFirstChild(gearName)
-    if gear then
-        foundedgear = gear
-    else
-    ReplicatedStorage.Remotes.ToggleAsset(gearId)
-    end
+    repeat
+        task.wait(0.1)
+        local gear = character:FindFirstChild(gearName) or backpack:FindFirstChild(gearName)
+        if gear then
+            foundedgear = gear
+        else
+            ReplicatedStorage.Remotes.ToggleAsset(gearId)
+        end
     until gear or character == nil
     return foundedgear
 end
 
 local function equiptool(n)
-    local mychar,backpack = GetCharacterAndBackpack()
+    local mychar, backpack = GetCharacterAndBackpack()
     if not mychar then return end
     local humanoid = mychar:FindFirstChildOfClass("Humanoid")
     if not humanoid then return end
@@ -765,7 +888,7 @@ local function playMusic(songid)
     pcall(function()
         local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         if not Character then return end
-        local backpack = LocalPlayer:WaitForChild("Backpack",5)
+        local backpack = LocalPlayer:WaitForChild("Backpack", 5)
         if not backpack then return end
         local boombox = backpack:WaitForChild("SuperFlyGoldBoombox", 5)
         if not boombox then return end
@@ -880,15 +1003,10 @@ local function processCommands(UserID, str)
             end
         end)
     elseif command == "startanchor" then
-        if AnchorConnection then return end
         AnchorPlayer()
-        AnchorConnection = LocalPlayer.CharacterAdded:Connect(function(v)
-            AnchorPlayer()
-        end)
+        anchorWhenRespawn = true
     elseif command == "stopanchor" then
-        if not AnchorConnection then return end
-        AnchorConnection:Disconnect()
-        AnchorConnection = nil
+        anchorWhenRespawn = false
     elseif command == "unantiplatform" then
         if not PlatformConnection then return end
         PlatformConnection:Disconnect()
@@ -908,12 +1026,12 @@ local function processCommands(UserID, str)
         if not targets then return end
         nanHealth(targets)
     elseif command == "playmusic" or command == "play" then
-        pcall(function ()
-        if split[2] then
-        playMusic(split[2])
-        else
-            playRandomMusic()
-        end
+        pcall(function()
+            if split[2] then
+                playMusic(split[2])
+            else
+                playRandomMusic()
+            end
         end)
     elseif command == "explode" then
         local targets = FindPlayers(Chatter, split[2])
@@ -1065,6 +1183,12 @@ Players.PlayerRemoving:Connect(function(v)
 end)
 
 
+LocalPlayer.CharacterAdded:Connect(function(v)
+    if anchorWhenRespawn then
+        AnchorPlayer()
+    end
+end)
+
 PlayerGui.ChildAdded:Connect(function(v)
     task.wait()
     if BlindGuisTable[v.Name] then
@@ -1103,19 +1227,18 @@ if game.PlaceId == 26838733 then
         --ReplicatedStorage.Remotes.BecomeAvatar:FireServer("1967676620") --for the cool avatar!
     end
     task.wait(1)
-    ToggleAsset(34898883)   --Positronic-Platform-Producer
-    ToggleAsset(68539623)   --Korblox-Sword-and-Shield
-    ToggleAsset(173755801)  --Diamond-Blade-Sword
-    ToggleAsset(169602103)  -- Seranoks-Rocket-Jumper
-    ToggleAsset(69210321)   --Hades-Staff-of-Darkness-A-Gamestop-Exclusive
-    ToggleAsset(53623322)   -- sorcus sword
-
+    ToggleAsset(34898883)  --Positronic-Platform-Producer
+    ToggleAsset(68539623)  --Korblox-Sword-and-Shield
+    ToggleAsset(173755801) --Diamond-Blade-Sword
+    ToggleAsset(169602103) -- Seranoks-Rocket-Jumper
     --[[
-    ToggleAsset(212641536)  -- boombox
+    ToggleAsset(69210321)   --Hades-Staff-of-Darkness-A-Gamestop-Exclusive
     ToggleAsset(106064277)  --cupid blade
     ToggleAsset(108153884)  --lucky hammer
     ToggleAsset(1469987740) -- bloxxy 1018
-    ]]--
+    ToggleAsset(53623322)   -- sorcus sword
+    ToggleAsset(212641536)  -- boombox
+    ]] --
 end
 
 StarterGui:SetCore("SendNotification", {
