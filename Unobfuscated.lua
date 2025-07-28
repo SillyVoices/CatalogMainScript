@@ -197,7 +197,6 @@ local function cleanball()
     end
 end
 
-
 local function RemoveFromList(List, Thing)
     local index = table.find(List, Thing)
     if not index then return end
@@ -231,36 +230,36 @@ local function Legacykorblox()
         sword.Parent = character
     end
     task.spawn(function() cleanball() end)
-    for index, char in pairs(FFkillList) do
+    for i = 1, #FFkillList do
         task.spawn(function()
+            local char = FFkillList[i]
             local targetTorso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
             local targetHumanoid = char:FindFirstChild("Humanoid")
-            if not (character and Humanoid and hp and myTorso and sword and char and targetTorso) then return end
-            if isAlive(targetHumanoid) then
+            if (character and Humanoid and myTorso and sword and char and targetTorso and targetHumanoid) then
                 if sword.Parent == character then
                     task.spawn(function()
+                        if (targetHumanoid.Health == 0 or char == nil) then
+                            RemoveFromList(FFkillList, char)
+                            return
+                        end
                         for _, v in pairs(char:GetChildren()) do
                             if v:IsA("BasePart") then
                                 task.spawn(function() cleantouch(char) end)
                                 task.spawn(function() v.Anchored = true end)
-                                task.spawn(function()
-                                    v.CFrame = myTorso.CFrame * CFrame.new(Vector3.new(1.5, 3.5, -1.8)) *
-                                        CFrame.Angles(math.rad(90), 0, 0)
-                                end)
+                                v.CFrame = myTorso.CFrame * CFrame.new(Vector3.new(1.5, 3.5, -1.8)) *
+                                    CFrame.Angles(math.rad(90), 0, 0)
                             end
                         end
                     end)
                 end
-            else
-                RemoveFromList(FFkillList, char)
-            end
-        end)
-        pcall(function()
-            if hp > 0 or hp ~= hp then
-                sword:Activate()
             end
         end)
     end
+    pcall(function()
+        if hp > 0 or hp ~= hp then
+            sword:Activate()
+        end
+    end)
 end
 
 local function TouchAndUnTouch(PartToTouch, MyTouchTransmitter)
@@ -343,9 +342,6 @@ end)
 if not success then
     print(err)
 end
-
-
-
 
 local function infhp(table)
     if #table == 0 then return end
@@ -487,23 +483,22 @@ local function TouchInterestPlatformKill(plr)
     end)
 end
 
-function LegacyPlatformKill(plr)
+function LegacyPlatformKill(plr) --despite the legacy name, it is actually brand new
     local Char, Backpack, PlatformGun, ShootEvent = getPlatformShooter()
     if (not (Char and Backpack and PlatformGun and ShootEvent) or PlatformCooldown) then return end
     local myTorso = Char:FindFirstChild("UpperTorso") or Char:FindFirstChild("Torso")
+    if not myTorso then return end
     local targetCharacter = plr.Character
     local targetTorso = targetCharacter:FindFirstChild("UpperTorso") or targetCharacter:FindFirstChild("Torso")
     if not targetTorso then return end
     local targetHead = targetCharacter:FindFirstChild("Head")
     if not targetHead then return end
-    local targetPosition = myTorso.Position + Vector3.new(0, 15, 10) + (myTorso.CFrame.LookVector * 4)
     task.spawn(function()
         targetHead.CanCollide = false
         targetHead.Anchored = true
         targetHead.Size = Vector3.new(50, 50, 50)
         targetHead.Transparency = 1
-        targetTorso.CFrame = CFrame.new(targetPosition)
-        targetHead.CFrame = CFrame.new(targetPosition)
+        targetCharacter:PivotTo(myTorso.CFrame * CFrame.new(0, 4, -10))
     end)
     if PlatformGun.Parent == Backpack then
         PlatformGun.Parent = Char
@@ -532,28 +527,28 @@ end
 local function kill(table)
     if #table == 0 then return end
     pcall(function()
-    local remote = GetDiamondRemote()
-    for i = 1, #table do
-        task.spawn(function()
-            local target = table[i]
-            local Character = target and target.Character
-            if not (target and remote and Character) then return end
-            local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-            if isAlive(Humanoid) then
-                remote:InvokeServer(7, Humanoid, math.huge)
-                if not IsGodMode(Character) or target == LocalPlayer then return end
-                if TorsoAnchored(Character) then
-                    insertToList(FFkillList, Character)
-                else
-                    if LegacyKillMethod then
-                        LegacyPlatformKill(target)
+        local remote = GetDiamondRemote()
+        for i = 1, #table do
+            task.spawn(function()
+                local target = table[i]
+                local Character = target and target.Character
+                if not (target and remote and Character) then return end
+                local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+                if isAlive(Humanoid) then
+                    remote:InvokeServer(7, Humanoid, math.huge)
+                    if not IsGodMode(Character) or target == LocalPlayer then return end
+                    if TorsoAnchored(Character) then
+                        insertToList(FFkillList, Character)
                     else
-                        TouchInterestPlatformKill(target)
+                        if LegacyKillMethod then
+                            LegacyPlatformKill(target)
+                        else
+                            TouchInterestPlatformKill(target)
+                        end
                     end
                 end
-            end
-        end)
-    end
+            end)
+        end
     end)
 end
 
