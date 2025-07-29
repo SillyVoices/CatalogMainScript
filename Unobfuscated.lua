@@ -71,7 +71,7 @@ local function num(str)
 end
 
 local function isAlive(humanoid)
-    return humanoid and (humanoid.Health > 0 or humanoid.Health ~= humanoid.Health) or false
+    return (humanoid and (humanoid.Health > 0 or humanoid.Health ~= humanoid.Health)) or false
 end
 
 local function FindPlayers(Me, input)
