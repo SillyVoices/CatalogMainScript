@@ -214,52 +214,69 @@ local function cleantouch(character)
     touch:Destroy()
 end
 
+local function IsGodMode(Character)
+    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+    return (Character:FindFirstChild("ForceField") or Humanoid.Health ~= Humanoid.Health or Humanoid.Health == math.huge or Character:FindFirstChild("DragonSword&Shield"))
+end
+
 local function Legacykorblox()
     if #FFkillList == 0 then return end
     local storage = LocalPlayer:FindFirstChild("Backpack")
+    local useSword = false
     local character = LocalPlayer.Character
     if not character then return end
     local Humanoid = character:FindFirstChild("Humanoid")
     if not Humanoid then return end
-    local hp = Humanoid.Health
     local myTorso = character:FindFirstChild("Torso")
     if not myTorso then return end
     local sword = storage:FindFirstChild("KorbloxSwordAndShield") or character:FindFirstChild("KorbloxSwordAndShield")
     if not sword then return end
-    if sword.Parent == storage then
-        sword.Parent = character
-    end
     task.spawn(function() cleanball() end)
-    for i = 1, #FFkillList do
-        task.spawn(function()
-            local char = FFkillList[i]
-            local targetTorso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
-            local targetHumanoid = char:FindFirstChild("Humanoid")
-            if (character and Humanoid and myTorso and sword and char and targetTorso and targetHumanoid) then
-                if sword.Parent == character then
-                    task.spawn(function()
-                        if (targetHumanoid.Health == 0 or char == nil) then
-                            RemoveFromList(FFkillList, char)
-                            return
-                        end
-                        for _, v in pairs(char:GetChildren()) do
-                            if v:IsA("BasePart") then
-                                task.spawn(function() cleantouch(char) end)
-                                task.spawn(function() v.Anchored = true end)
-                                v.CFrame = myTorso.CFrame * CFrame.new(Vector3.new(1.5, 3.5, -1.8)) *
-                                    CFrame.Angles(math.rad(90), 0, 0)
-                            end
-                        end
-                    end)
+    local cloneList = FFkillList
+    for i = 1, #cloneList do
+        local char = cloneList[i]
+
+        if not char then
+            RemoveFromList(FFkillList, char)
+            continue
+        end
+
+        local targetTorso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+        local targetHumanoid = char:FindFirstChild("Humanoid")
+
+        if not (targetTorso and targetHumanoid) then
+            RemoveFromList(FFkillList, char)
+            continue
+        end
+
+        if not isAlive(targetHumanoid) then
+            RemoveFromList(FFkillList, char)
+            continue
+        end
+
+        if (character and Humanoid and myTorso and sword and char and targetTorso and targetHumanoid) then
+            if not useSword then
+                useSword = true
+            end
+            for _, v in pairs(char:GetChildren()) do
+                if v:IsA("BasePart") then
+                    task.spawn(function() cleantouch(char) end)
+                    task.spawn(function() v.Anchored = true end)
+                    v.CFrame = myTorso.CFrame * CFrame.new(Vector3.new(1.5, 3.5, -1.8)) *
+                        CFrame.Angles(math.rad(90), 0, 0)
                 end
             end
-        end)
+        end
     end
-    pcall(function()
-        if hp > 0 or hp ~= hp then
+
+    if useSword then
+        if sword.Parent == storage then
+            sword.Parent = character
+        end
+        if (Humanoid.Health > 0 or Humanoid.Health ~= Humanoid.Health) then
             sword:Activate()
         end
-    end)
+    end
 end
 
 local function TouchAndUnTouch(PartToTouch, MyTouchTransmitter)
@@ -453,6 +470,7 @@ end
 PlatformCoolDown = false
 
 
+
 local function TouchInterestPlatformKill(plr)
     local Char, Backpack, PlatformGun, ShootEvent = getPlatformShooter()
     if (not (Char and Backpack and PlatformGun and ShootEvent) or PlatformCooldown) then return end
@@ -498,7 +516,7 @@ function LegacyPlatformKill(plr) --despite the legacy name, it is actually brand
         targetHead.Anchored = true
         targetHead.Size = Vector3.new(50, 50, 50)
         targetHead.Transparency = 1
-        targetCharacter:PivotTo(myTorso.CFrame * CFrame.new(0, 4, -10))
+        targetCharacter:PivotTo(myTorso.CFrame * CFrame.new(0, 4, 10))
     end)
     if PlatformGun.Parent == Backpack then
         PlatformGun.Parent = Char
@@ -512,11 +530,6 @@ function LegacyPlatformKill(plr) --despite the legacy name, it is actually brand
         task.wait(0.5)
         PlatformCoolDown = false
     end)
-end
-
-local function IsGodMode(Character)
-    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-    return (Character:FindFirstChild("ForceField") or Humanoid.Health ~= Humanoid.Health or Humanoid.Health == math.huge or Character:FindFirstChild("DragonSword&Shield"))
 end
 
 local function TorsoAnchored(Character)
