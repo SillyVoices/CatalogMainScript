@@ -26,7 +26,7 @@ local LegacyKillMethod     = true  --this makes the script more stable and reduc
 local creator              = false --this gives cool avatar
 local publicMode           = false --this makes that everyone can use your commands
 local chatCooldown         = false
-local nan                  = 0 / 0
+local NaN                  = 0 / 0
 local anchorWhenRespawn    = false
 local ImportantPlayerParts = {
     Head = true,
@@ -55,13 +55,15 @@ local ImportantPlayerParts = {
     ForceField = true
 }
 StarterGui:SetCore("SendNotification", {
-    Title = "Catalog Heaven Admin Script Prefix is " .. prefix,
-    Text = "Loading script...",
+    Title = "Catalog Heaven Admin Script",
+    Text = "Loading script...\n Prefix is {" .. prefix .. "}",
     Duration = 5,
 })
 
-local function num(str)
-    if str == "inf" then
+local function number(str)
+    if str == nil then
+        return 0 / 0
+    elseif str == "inf" then
         return math.huge
     elseif tonumber(str) then
         return tonumber(str)
@@ -363,7 +365,7 @@ local success, err = pcall(function()
         local args = { ... }
         local method = getnamecallmethod()
         if tostring(self) == "Report" and method == "FireServer" then
-            args[1] = CFrame.new(nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan)
+            args[1] = CFrame.new(NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN)
         end
         return shothook(self, unpack(args))
     end)
@@ -390,18 +392,7 @@ end
 
 local PlatformCooldown = false
 
-local function sendKillDiamondRemoteToHumanoid(remote, Humanoid, damage)
-    remote:InvokeServer(7, Humanoid, damage)
-end
 
-local function sendDiamondRemoteToPlayersTable(remote, target, damage)
-    for i = 1, #target do
-        local Character = target[i] and target.Character
-        if not (target and remote and Character) then return end
-        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-        remote:InvokeServer(7, Humanoid, damage)
-    end
-end
 
 local function getPlatformShooter()
     local Character, Backpack = GetCharacterAndBackpack()
@@ -575,16 +566,42 @@ local function kill(table)
     end)
 end
 
-local function dealDamage(dmg, targets)
-    local DamageToDeal = num(dmg)
+local function sendKillDiamondRemoteToHumanoid(remote, Humanoid, damage)
+    if Humanoid then
+        remote:InvokeServer(7, Humanoid, damage)
+    end
+end
+
+local function sendDiamondRemoteToPlayersTable(remote, targets, damage)
+    for i = 1, #targets do
+        task.spawn(function()
+            local player = targets[i]
+            if not player then return end
+            local character = player.Character
+            if not (player and remote and character) then return end
+            local Humanoid = character:FindFirstChildOfClass("Humanoid")
+            if Humanoid then
+                remote:InvokeServer(7, Humanoid, damage)
+            end
+        end)
+    end
+end
+
+local function dealDamage(table, dmg)
+    if #table == 0 then return end
+    local DamageToDeal = number(dmg)
     local remote = GetDiamondRemote()
-    sendDiamondRemoteToPlayersTable(remote, targets, DamageToDeal)
+    if remote then
+        sendDiamondRemoteToPlayersTable(remote, table, DamageToDeal)
+    end
 end
 
 local function nanHealth(table)
     if #table == 0 then return end
     local remote = GetDiamondRemote()
-    sendDiamondRemoteToPlayersTable(remote, table, nan)
+    if remote then
+        sendDiamondRemoteToPlayersTable(remote, table, NaN)
+    end
 end
 
 local function checkTrueIfInList(tbl, playerName, plr)
@@ -678,8 +695,6 @@ local function baseProtectfun(myPlayer)
         cleanUp:Destroy()
     end
 end
-
-
 
 local function MainLoop()
     pcall(function()
@@ -788,7 +803,7 @@ local function equipSorcusAndActivate()
 end
 
 local function walkspeed(list, spd)
-    local targetSpeed = num(spd)
+    local targetSpeed = number(spd)
     local DiamondRemote = GetDiamondRemote()
     for i = 1, #list do
         task.spawn(function()
@@ -972,7 +987,7 @@ local function processCommands(UserID, str)
     local command = split[1]
     if command == "speed" then
         local targets = FindPlayers(Chatter, split[2])
-        local speed = num(split[3])
+        local speed = number(split[3])
         if not targets then return end
         walkspeed(targets, speed)
     elseif command == "killaura" then
@@ -1006,6 +1021,10 @@ local function processCommands(UserID, str)
                 end)
             end
         end)
+    elseif command == "debug" then
+        for i, v in pairs(split) do
+            print(i .. ", " .. v)
+        end
     elseif command == "startanchor" then
         AnchorPlayer()
         anchorWhenRespawn = true
@@ -1148,9 +1167,9 @@ local function processCommands(UserID, str)
         end
     elseif command == "dmg" or command == "damage" then
         local targets = FindPlayers(Chatter, split[2])
-        local dmgnum = num(split[3])
-        if targets and dmgnum then
-            dealDamage(targets, dmgnum)
+        local damage = number(split[3])
+        if targets then
+            dealDamage(targets, damage)
         end
     end
 end
