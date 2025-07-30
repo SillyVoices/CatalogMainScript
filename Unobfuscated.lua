@@ -521,12 +521,6 @@ function LegacyPlatformKill(plr) --despite the legacy name, it is actually brand
     if not targetTorso then return end
     local targetHead = targetCharacter:FindFirstChild("Head")
     if not targetHead then return end
-    task.spawn(function ()
-    local face =  targetHead.face
-    if face then
-        face:Destroy()
-    end
-    end)
     task.spawn(function()
         targetHead.CanCollide = false
         targetHead.Anchored = true
