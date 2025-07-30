@@ -239,7 +239,9 @@ local function LegacykorbloxNew()
     task.spawn(function() cleanball() end)
     local cloneList = FFkillList
     for i = 1, #cloneList do
-        local char = cloneList[i]
+        local Player = cloneList[i]
+        
+        local char = Player.Character
 
         if not char then
             RemoveFromList(FFkillList, char)
@@ -328,7 +330,8 @@ local function equipKorbloxAndKillOld() --old verison
     task.spawn(function()
         for i = 1, #FFkillList do
             task.spawn(function()
-                local target = FFkillList[i]
+                local target = FFkillList[i].Character
+                if not target then return end
                 local TheirHumanoid = target and target:FindFirstChildOfClass("Humanoid")
                 if (TheirHumanoid.Health == 0 or target == nil) then
                     RemoveFromList(FFkillList, target)
@@ -556,7 +559,7 @@ local function kill(table)
                     remote:InvokeServer(7, Humanoid, math.huge)
                     if not IsGodMode(Character) or target == LocalPlayer then return end
                     if isAnchored(Character) then
-                        insertToList(FFkillList, Character)
+                        insertToList(FFkillList, target)
                     else
                         if LegacyKillMethod then
                             LegacyPlatformKill(target)
@@ -1193,6 +1196,7 @@ end
 Players.PlayerRemoving:Connect(function(v)
     RemoveFromList(baseProtect, v.Name)
     RemoveFromList(killAuraList, v.Name)
+    RemoveFromList(FFkillList, v)
 end)
 
 
