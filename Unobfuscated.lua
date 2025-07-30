@@ -303,7 +303,7 @@ end
 
 local korbloxEquipped = false
 
-local function equipKorbloxAndKill()
+local function equipKorbloxAndKill() --old verison
     if not korbloxEquipped and #FFkillList == 0 then return end
     if korbloxEquipped and #FFkillList == 0 then
         local backpack = LocalPlayer:FindFirstChild("Backpack")
