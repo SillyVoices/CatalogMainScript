@@ -23,7 +23,7 @@ local loopkillRejoinProof  = {}
 local baseProtect          = {}
 local killAuraList         = {}
 local LegacyKillMethod     = true  --this makes the script more stable and reduces crashes
-local creator              = true  --this gives cool avatar
+local creator              = false --this gives cool avatar
 local publicMode           = false --this makes that everyone can use your commands
 local chatCooldown         = false
 local nan                  = 0 / 0
@@ -55,7 +55,7 @@ local ImportantPlayerParts = {
     ForceField = true
 }
 StarterGui:SetCore("SendNotification", {
-    Title = "Catalog Heaven Admin Script Prefix is "..prefix,
+    Title = "Catalog Heaven Admin Script Prefix is " .. prefix,
     Text = "Loading script...",
     Duration = 5,
 })
@@ -182,7 +182,7 @@ end
 
 local function GetCharacterAndBackpack()
     local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local Backpack = LocalPlayer:FindFirstChild("Backpack") or LocalPlayer:WaitForChild("Backpack", 5)
+    local Backpack = LocalPlayer:FindFirstChild("Backpack") or LocalPlayer:WaitForChild("Backpack", 1)
     return Character, Backpack
 end
 
@@ -240,7 +240,7 @@ local function LegacykorbloxNew()
     local cloneList = FFkillList
     for i = 1, #cloneList do
         local Player = cloneList[i]
-        
+
         local char = Player.Character
 
         if not char then
@@ -390,15 +390,17 @@ end
 
 local PlatformCooldown = false
 
-local function sendKillDiamondRemoteToHumanoid(Humanoid, remote, damage)
+local function sendKillDiamondRemoteToHumanoid(remote, Humanoid, damage)
     remote:InvokeServer(7, Humanoid, damage)
 end
 
-local function sendDiamondRemoteToPlayers(target, remote, damage)
-    local Character = target and target.Character
-    if not (target and remote and Character) then return end
-    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-    remote:InvokeServer(7, Humanoid, damage)
+local function sendDiamondRemoteToPlayersTable(remote, target, damage)
+    for i = 1, #target do
+        local Character = target[i] and target.Character
+        if not (target and remote and Character) then return end
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        remote:InvokeServer(7, Humanoid, damage)
+    end
 end
 
 local function getPlatformShooter()
@@ -428,11 +430,11 @@ local function fireRocket(List)
         task.spawn(function()
             local plr = List[i]
             if not plr then return end
-            local char = plr.Character
-            if not char then return end
-            local head = char:FindFirstChild("Head")
+            local TargetCharacter = plr.Character
+            if not TargetCharacter then return end
+            local head = TargetCharacter:FindFirstChild("Head")
             if not head then return end
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            local humanoid = TargetCharacter:FindFirstChildOfClass("Humanoid")
             if not isAlive(humanoid) then return end
             local StartingPosition = head.Position
             RocketRemoteEvent:FireServer(StartingPosition - Vector3.new(0, 1, 0), StartingPosition)
@@ -484,36 +486,6 @@ PlatformCoolDown = false
 
 
 
-local function TouchInterestPlatformKill(plr)
-    local Char, Backpack, PlatformGun, ShootEvent = getPlatformShooter()
-    if (not (Char and Backpack and PlatformGun and ShootEvent) or PlatformCooldown) then return end
-    if PlatformGun.Parent == Backpack then
-        PlatformGun.Parent = Char
-    end
-    local torso = Char:FindFirstChild("Torso") or Char:FindFirstChild("UpperTorso")
-    local shootPosition = torso.Position + Vector3.new(0, 2, 0) + (torso.CFrame.LookVector * 4)
-    ShootEvent:FireServer(shootPosition)
-    task.wait()
-    if PlatformGun.Parent == Char then
-        PlatformGun.Parent = Backpack
-    end
-    local StickyStep = GetStickeyStep()
-    if StickyStep then
-        task.spawn(function()
-            local char = plr.Character
-            if not char then return end
-            local head = char:FindFirstChild("Head")
-            if not head then return end
-            TouchAndUnTouch(head, StickyStep)
-        end)
-    end
-    task.spawn(function()
-        PlatformCoolDown = true
-        task.wait(0.5)
-        PlatformCoolDown = false
-    end)
-end
-
 function LegacyPlatformKill(plr) --despite the legacy name, it is actually brand new
     local Char, Backpack, PlatformGun, ShootEvent = getPlatformShooter()
     if (not (Char and Backpack and PlatformGun and ShootEvent) or PlatformCooldown) then return end
@@ -537,6 +509,36 @@ function LegacyPlatformKill(plr) --despite the legacy name, it is actually brand
     ShootEvent:FireServer(targetTorso.Position)
     if PlatformGun.Parent == Char then
         PlatformGun.Parent = Backpack
+    end
+    task.spawn(function()
+        PlatformCoolDown = true
+        task.wait(0.5)
+        PlatformCoolDown = false
+    end)
+end
+
+local function TouchInterestPlatformKill(plr) --old unstable pltaform kill
+    local Char, Backpack, PlatformGun, ShootEvent = getPlatformShooter()
+    if (not (Char and Backpack and PlatformGun and ShootEvent) or PlatformCooldown) then return end
+    if PlatformGun.Parent == Backpack then
+        PlatformGun.Parent = Char
+    end
+    local torso = Char:FindFirstChild("Torso") or Char:FindFirstChild("UpperTorso")
+    local shootPosition = torso.Position + Vector3.new(0, 2, 0) + (torso.CFrame.LookVector * 4)
+    ShootEvent:FireServer(shootPosition)
+    task.wait()
+    if PlatformGun.Parent == Char then
+        PlatformGun.Parent = Backpack
+    end
+    local StickyStep = GetStickeyStep()
+    if StickyStep then
+        task.spawn(function()
+            local char = plr.Character
+            if not char then return end
+            local head = char:FindFirstChild("Head")
+            if not head then return end
+            TouchAndUnTouch(head, StickyStep)
+        end)
     end
     task.spawn(function()
         PlatformCoolDown = true
@@ -573,29 +575,16 @@ local function kill(table)
     end)
 end
 
-local function damage(dmg, targets)
-    local _damage = num(dmg)
+local function dealDamage(dmg, targets)
+    local DamageToDeal = num(dmg)
     local remote = GetDiamondRemote()
-    if type(targets) == "table" then
-        if #targets == 0 then return end
-        for i = 1, #targets do
-            task.spawn(function()
-                sendDiamondRemoteToPlayers(targets[i], remote, _damage)
-            end)
-        end
-    else
-        sendDiamondRemoteToPlayers(targets, remote, _damage)
-    end
+    sendDiamondRemoteToPlayersTable(remote, targets, DamageToDeal)
 end
 
 local function nanHealth(table)
     if #table == 0 then return end
     local remote = GetDiamondRemote()
-    for i = 1, #table do
-        task.spawn(function()
-            sendDiamondRemoteToPlayers(table[i], remote, nan)
-        end)
-    end
+    sendDiamondRemoteToPlayersTable(remote, table, nan)
 end
 
 local function checkTrueIfInList(tbl, playerName, plr)
@@ -800,7 +789,7 @@ end
 
 local function walkspeed(list, spd)
     local targetSpeed = num(spd)
-    local diamondRomote = GetDiamondRemote()
+    local DiamondRemote = GetDiamondRemote()
     for i = 1, #list do
         task.spawn(function()
             local plr = list[i]
@@ -829,7 +818,7 @@ local function walkspeed(list, spd)
                 print(domath .. " will kill " .. plr.Name .. " with " .. humanoid.Health)
                 return
             end
-            sendKillDiamondRemoteToHumanoid(humanoid, diamondRomote, domath)
+            sendKillDiamondRemoteToHumanoid(DiamondRemote, humanoid, domath)
             print("dealing " .. domath .. "damage to " .. plr.Name)
         end)
     end
@@ -904,9 +893,9 @@ local function playMusic(songid)
     pcall(function()
         local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         if not Character then return end
-        local backpack = LocalPlayer:WaitForChild("Backpack", 5)
+        local backpack = LocalPlayer:WaitForChild("Backpack", 2)
         if not backpack then return end
-        local boombox = backpack:WaitForChild("SuperFlyGoldBoombox", 5)
+        local boombox = backpack:WaitForChild("SuperFlyGoldBoombox", 2)
         if not boombox then return end
         boombox.Parent = Character
         Character.SuperFlyGoldBoombox.Remote:FireServer("PlaySong", tonumber(songid))
@@ -975,7 +964,6 @@ local destroyList = { ["Rocket"] = true, ["Explosion"] = true }
 local function processCommands(UserID, str)
     local Rocketconnection = nil
     local PlatformConnection = nil
-    local AnchorConnection = nil
     local uncleanedstring = str
     local Chatter = Players:GetPlayerByUserId(UserID)
     local lowerstring = uncleanedstring:lower()
@@ -1162,7 +1150,7 @@ local function processCommands(UserID, str)
         local targets = FindPlayers(Chatter, split[2])
         local dmgnum = num(split[3])
         if targets and dmgnum then
-            damage(targets, dmgnum)
+            dealDamage(targets, dmgnum)
         end
     end
 end
