@@ -55,7 +55,7 @@ local ImportantPlayerParts = {
     ForceField = true
 }
 StarterGui:SetCore("SendNotification", {
-    Title = "Catalog Heaven Admin Script",
+    Title = "Catalog Heaven Admin Script Prefix is "..prefix,
     Text = "Loading script...",
     Duration = 5,
 })
