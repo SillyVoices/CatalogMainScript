@@ -219,6 +219,11 @@ local function IsGodMode(Character)
     return (Character:FindFirstChild("ForceField") or Humanoid.Health ~= Humanoid.Health or Humanoid.Health == math.huge or Character:FindFirstChild("DragonSword&Shield"))
 end
 
+local function isAnchored(Character)
+    local theirTorso = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
+    return (theirTorso and theirTorso.Anchored or Character:FindFirstChild("DrumKit") ~= nil)
+end
+
 local function Legacykorblox()
     if #FFkillList == 0 then return end
     local storage = LocalPlayer:FindFirstChild("Backpack")
@@ -250,6 +255,11 @@ local function Legacykorblox()
         end
 
         if not isAlive(targetHumanoid) then
+            RemoveFromList(FFkillList, char)
+            continue
+        end
+
+        if not isAnchored(char) then
             RemoveFromList(FFkillList, char)
             continue
         end
@@ -514,9 +524,10 @@ function LegacyPlatformKill(plr) --despite the legacy name, it is actually brand
     task.spawn(function()
         targetHead.CanCollide = false
         targetHead.Anchored = true
+        targetHead.TextureID = ""
         targetHead.Size = Vector3.new(50, 50, 50)
         targetHead.Transparency = 1
-        targetCharacter:PivotTo(myTorso.CFrame * CFrame.new(0, 4, 10))
+        targetCharacter:PivotTo(myTorso.CFrame * CFrame.new(0, 4, 6))
     end)
     if PlatformGun.Parent == Backpack then
         PlatformGun.Parent = Char
@@ -532,11 +543,6 @@ function LegacyPlatformKill(plr) --despite the legacy name, it is actually brand
     end)
 end
 
-local function TorsoAnchored(Character)
-    local theirTorso = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
-    return (theirTorso and theirTorso.Anchored or Character:FindFirstChild("DrumKit") ~= nil)
-end
-
 local function kill(table)
     if #table == 0 then return end
     pcall(function()
@@ -550,7 +556,7 @@ local function kill(table)
                 if isAlive(Humanoid) then
                     remote:InvokeServer(7, Humanoid, math.huge)
                     if not IsGodMode(Character) or target == LocalPlayer then return end
-                    if TorsoAnchored(Character) then
+                    if isAnchored(Character) then
                         insertToList(FFkillList, Character)
                     else
                         if LegacyKillMethod then
