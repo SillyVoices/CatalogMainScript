@@ -32,6 +32,8 @@ crashes the player if you use the blind command and the blind snowflake some how
 
 Attempts to korblox while anchored
 
+Antiplatform hard counters this script
+
 # Yes, I made this script
 
 Nobody believes me for some reason. :c
