@@ -224,7 +224,7 @@ local function isAnchored(Character)
     return (theirTorso and theirTorso.Anchored or Character:FindFirstChild("DrumKit") ~= nil)
 end
 
-local function Legacykorblox()
+local function LegacykorbloxNew()
     if #FFkillList == 0 then return end
     local storage = LocalPlayer:FindFirstChild("Backpack")
     local useSword = false
@@ -303,7 +303,7 @@ end
 
 local korbloxEquipped = false
 
-local function equipKorbloxAndKill() --old verison
+local function equipKorbloxAndKillOld() --old verison
     if not korbloxEquipped and #FFkillList == 0 then return end
     if korbloxEquipped and #FFkillList == 0 then
         local backpack = LocalPlayer:FindFirstChild("Backpack")
@@ -702,9 +702,9 @@ local function MainLoop()
         end)
         task.spawn(function()
             if LegacyKillMethod then
-                Legacykorblox()
+                LegacykorbloxNew()
             else
-                equipKorbloxAndKill()
+                equipKorbloxAndKillOld()
             end
         end)
         task.spawn(function()
