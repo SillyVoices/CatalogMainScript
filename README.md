@@ -11,5 +11,6 @@ me, all, others, hackers, PlayerName/DisplayName, bacons.
 
 # Extras
 Everyone in Catalog Heaven Hates me!!!!!!!!! I dont care any more. -- July 27 2025
+
 July 31 2025, seranok, if you are seeing this, pls secure seranok's rocket jumper's remote event.
 
