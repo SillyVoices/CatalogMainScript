@@ -9,23 +9,29 @@ local StarterGui           = game:GetService("StarterGui")
 local TextChatService      = game:GetService("TextChatService")
 local ReplicatedStorage    = game:GetService("ReplicatedStorage")
 local VirtualUser          = game:GetService("VirtualUser")
+local Remotes              = ReplicatedStorage:WaitForChild("Remotes", 4)
 local LocalPlayer          = Players.LocalPlayer
-local PlayerGui            = LocalPlayer:WaitForChild("PlayerGui", 5)
+local PlayerGui            = LocalPlayer:WaitForChild("PlayerGui", 4)
 local BlindGuisTable       = { ScreenFog = true, DarknessGui = true, VolleyballScreenGui = true, FlashBangEffect = true }
 local LocalPlayerWhiteList = { LocalPlayer.UserId }
+local adminCommands        = {}
 local LoopkillList         = {}
 local LoopGodList          = {}
 local whitelist            = {}
 local FFkillList           = {}
 local saveList             = {}
-local RocketList           = {}
+local ExplodeList          = {}
 local loopkillRejoinProof  = {}
-local baseProtect          = {}
+local baseProtectionList   = {}
 local killAuraList         = {}
+local killnewplayers       = false
+local autocrash            = false
 local LegacyKillMethod     = true  --this makes the script more stable and reduces crashes
-local creator              = false --this gives cool avatar
+local creator              = false --this gives avatar
 local publicMode           = false --this makes that everyone can use your commands
 local chatCooldown         = false
+local Rocketconnection     = nil
+local PlatformConnection   = nil
 local NaN                  = 0 / 0
 local anchorWhenRespawn    = false
 local ImportantPlayerParts = {
@@ -54,12 +60,18 @@ local ImportantPlayerParts = {
     Health = true,
     ForceField = true
 }
-StarterGui:SetCore("SendNotification", {
-    Title = "Catalog Heaven Admin Script",
-    Text = "Loading script...\n Prefix is {" .. prefix .. "}",
-    Duration = 5,
-})
 
+local function Notify(title, text)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = 6,
+    })
+end
+
+Notify("Catalog Heaven Admin Script; verison july 31 2025", "Loading script..." .. "\nPrefix is" .. " {" .. prefix .. "}")
+
+print("I dropped this silly bombshell on july, 31, 2025, this script may be patched if seranok some how rise from the grave and patch it.")
 local function number(str)
     if str == nil then
         return 0 / 0
@@ -76,8 +88,25 @@ local function isAlive(humanoid)
     return (humanoid and (humanoid.Health > 0 or humanoid.Health ~= humanoid.Health)) or false
 end
 
+local function insertToList(list, v)
+    local index = table.find(list, v)
+    if index then return end
+    table.insert(list, v)
+end
+
+local function RemoveFromList(List, Thing)
+    local index = table.find(List, Thing)
+    if not index then return end
+    table.remove(List, index)
+end
+
+
 local function FindPlayers(Me, input)
     local Loosers = {}
+    if not input then
+        print("No player input")
+        return
+    end
     local target = input:lower()
     local allplayers = Players:GetPlayers()
     if not target then return end
@@ -167,13 +196,34 @@ local function FindPlayers(Me, input)
     return Loosers
 end
 
+
+
+adminCommands.parse = function(UserID, text)
+    local Player = Players:GetPlayerByUserId(UserID)
+    local lowerstring = text:lower()
+    if lowerstring:sub(1, 1) ~= prefix then return end
+    local split = string.sub(lowerstring, 2):split(" ")
+    local command = split[1]
+    if not command then return end
+    local payload = { ["player"] = Player, ["data"] = {} }
+    if #split <= 2 then
+        for i = 2, #split do
+            table.insert(payload.data, split[i])
+        end
+    end
+    if adminCommands[command] ~= nil then
+        adminCommands[command](payload)
+    end
+end
+
+
 local function ToggleAsset(id)
-    ReplicatedStorage.Remotes.ToggleAsset:InvokeServer(id)
+    ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("ToggleAsset"):InvokeServer(id)
 end
 
 local function RetoggleGear(id)
-    ReplicatedStorage.Remotes.ToggleAsset:InvokeServer(id)
-    ReplicatedStorage.Remotes.ToggleAsset:InvokeServer(id)
+    ToggleAsset(id)
+    ToggleAsset(id)
 end
 
 function Chat(Message)
@@ -190,7 +240,7 @@ end
 
 local function cleanball()
     for _, part in pairs(Workspace:GetChildren()) do
-        if part.Name == "Part" then
+        if part.Namexw == "Part" then
             local sound = part:FindFirstChild("HoHoHo")
             if sound then
                 part:Destroy()
@@ -199,11 +249,6 @@ local function cleanball()
     end
 end
 
-local function RemoveFromList(List, Thing)
-    local index = table.find(List, Thing)
-    if not index then return end
-    table.remove(List, index)
-end
 
 
 local function cleantouch(character)
@@ -235,7 +280,8 @@ local function LegacykorbloxNew()
     local Humanoid = character:FindFirstChild("Humanoid")
     if not Humanoid then return end
     local myTorso = character:FindFirstChild("Torso")
-    if not myTorso then return end
+    if not (myTorso or myTorso.Anchored) then return end
+
     local sword = storage:FindFirstChild("KorbloxSwordAndShield") or character:FindFirstChild("KorbloxSwordAndShield")
     if not sword then return end
     task.spawn(function() cleanball() end)
@@ -375,6 +421,10 @@ if not success then
     print(err)
 end
 
+
+
+
+
 local function infhp(table)
     if #table == 0 then return end
     local remote = GetDiamondRemote()
@@ -390,9 +440,28 @@ local function infhp(table)
     end
 end
 
+adminCommands["god"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    if player and target then
+        infhp(FindPlayers(target))
+    end
+end
+
+
+adminCommands["loopgod"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    if player and target then
+        local findtargets = FindPlayers(target)
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            insertToList(LoopGodList, v)
+        end
+    end
+end
+
 local PlatformCooldown = false
-
-
 
 local function getPlatformShooter()
     local Character, Backpack = GetCharacterAndBackpack()
@@ -413,7 +482,7 @@ local function GetRocketRemote()
     return RocketRemoteEvent
 end
 
-local function fireRocket(List)
+local function Explode(List)
     if #List == 0 then return end
     local RocketRemoteEvent = GetRocketRemote()
     if not RocketRemoteEvent then return end
@@ -433,11 +502,39 @@ local function fireRocket(List)
     end
 end
 
-local function insertToList(list, v)
-    local index = table.find(list, v)
-    if index then return end
-    table.insert(list, v)
+adminCommands["loopexplode"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    if player and target then
+        local findtargets = FindPlayers(target)
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            insertToList(ExplodeList, v)
+        end
+    end
 end
+
+adminCommands["unloopexplode"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    if player and target then
+        local findtargets = FindPlayers(target)
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            RemoveFromList(ExplodeList, v)
+        end
+    end
+end
+adminCommands["explode"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    if player and target then
+        local findtargets = FindPlayers(target)
+        if findtargets == nil then return end
+        Explode(findtargets)
+    end
+end
+
 
 local function GetStickeyStep()
     local something
@@ -566,6 +663,78 @@ local function kill(table)
     end)
 end
 
+
+adminCommands["loopkill"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            insertToList(LoopkillList, v)
+        end
+    end
+end
+
+adminCommands["unloopkill"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            RemoveFromList(LoopkillList, v)
+            RemoveFromList(loopkillRejoinProof, v.UserId)
+        end
+    end
+end
+adminCommands["kill"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        kill(findtargets)
+    end
+end
+local function checkPermisson(v)
+    return (whitelist[v] or table.find(LocalPlayerWhiteList, v))
+end
+
+adminCommands["whitelist"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    local targets = FindPlayers(player, target[1])
+    if targets then
+        for i = 1, #targets do
+            task.spawn(function()
+                local plr = targets[i]
+                if checkPermisson(plr) then return end
+                whitelist[plr.UserId] = true
+            end)
+        end
+    end
+end
+
+adminCommands["unwhitelist"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local targets = FindPlayers(player, target[1])
+        if targets then
+            for i = 1, #targets do
+                task.spawn(function()
+                    local plr = targets[i]
+                    if not checkPermisson(plr) then return end
+                    if plr.UserId ~= LocalPlayer.UserId then
+                        whitelist[plr.UserId] = false
+                    end
+                end)
+            end
+        end
+    end
+end
+
 local function sendKillDiamondRemoteToHumanoid(remote, Humanoid, damage)
     if Humanoid then
         remote:InvokeServer(7, Humanoid, damage)
@@ -596,11 +765,55 @@ local function dealDamage(table, dmg)
     end
 end
 
+adminCommands["damage"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        dealDamage(findtargets, target[2])
+    end
+end
+
 local function nanHealth(table)
     if #table == 0 then return end
     local remote = GetDiamondRemote()
     if remote then
         sendDiamondRemoteToPlayersTable(remote, table, NaN)
+    end
+end
+
+adminCommands["nan"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        nanHealth(findtargets)
+    end
+end
+
+adminCommands["save"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            insertToList(saveList, v)
+        end
+    end
+end
+
+adminCommands["unsave"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            RemoveFromList(saveList, v)
+        end
     end
 end
 
@@ -652,7 +865,29 @@ local function killaura(myPlayer)
     end
 end
 
-local function baseProtectfun(myPlayer)
+adminCommands["killaura"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        killaura(findtargets)
+    end
+end
+
+adminCommands["unkillaura"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for _, v in pairs(findtargets) do
+            RemoveFromList(killAuraList, v.Name)
+        end
+    end
+end
+
+local function baseprotection(myPlayer)
     local hitboxsize = Vector3.new(60, 60, 60)
     local playerName = myPlayer.Name
     local cloudname = playerName .. "'s Cloud"
@@ -672,9 +907,9 @@ local function baseProtectfun(myPlayer)
     clone.CanQuery = false
     clone.Transparency = 0.5
     clone.Name = cloneName
-    insertToList(baseProtect, playerName)
+    insertToList(baseProtectionList, playerName)
     task.wait()
-    while checkTrueIfInList(baseProtect, playerName, myPlayer) do
+    while checkTrueIfInList(baseProtectionList, playerName, myPlayer) do
         task.wait()
         task.spawn(function()
             local playersNearMe = Workspace:GetPartBoundsInBox(clone.CFrame, hitboxsize, param)
@@ -696,6 +931,30 @@ local function baseProtectfun(myPlayer)
     end
 end
 
+
+adminCommands["bp"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        baseprotection(findtargets)
+    end
+end
+
+adminCommands["unbp"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for _, v in pairs(findtargets) do
+            RemoveFromList(baseProtectionList, v.Name)
+        end
+    end
+end
+
+
 local function MainLoop()
     pcall(function()
         task.spawn(function()
@@ -715,7 +974,7 @@ local function MainLoop()
             end
         end)
         task.spawn(function()
-            fireRocket(RocketList)
+            Explode(ExplodeList)
         end)
     end)
 end
@@ -778,10 +1037,6 @@ local function ColorAllParts(t)
     end
 end
 
-local function equiptoolandColor(tool)
-    ColorAllParts(tool)
-end
-
 task.spawn(function()
     for _, v in pairs(PlayerGui:GetChildren()) do
         if BlindGuisTable[v.Name] then
@@ -790,10 +1045,267 @@ task.spawn(function()
     end
 end)
 
+
+local function CountMap(map)
+    local count = 0
+    for k, v in pairs(map) do
+        count = count + 1
+    end
+    return count
+end
+
+local function findValueOfIndex(index, table)
+    local ans = nil
+    local count = 0
+    for k, v in pairs(table) do
+        count = count + 1
+        if count == index then
+            ans = v
+            break
+        end
+    end
+    return ans
+end
+
+local MusicList = { ["Alkline Tears"] = 73718692864423 }
+
+
+local function playMusic(songid)
+    pcall(function()
+        local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        if not Character then return end
+        local backpack = LocalPlayer:WaitForChild("Backpack", 2)
+        if not backpack then return end
+        local boombox = backpack:WaitForChild("SuperFlyGoldBoombox", 2)
+        if not boombox then return Notify("Missing gear", "boombox needed") end
+        boombox.Parent = Character
+        Character.SuperFlyGoldBoombox.Remote:FireServer("PlaySong", tonumber(songid))
+        boombox.DescendantAdded:wait()
+        task.wait()
+        boombox.Parent = backpack
+        local Sound = boombox:FindFirstChildWhichIsA("Sound", true)
+        repeat task.wait() until not Sound.IsPlaying
+        Sound:Play()
+        Sound.TimePosition = Settings.Time
+    end)
+end
+
+adminCommands["play"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    if player and target then
+        playMusic(target)
+    end
+end
+
+local function playRandomMusic()
+    local randomNum = math.random(1, CountMap(MusicList))
+    SoundIDtoPlay = findValueOfIndex(randomNum, MusicList)
+    playMusic(SoundIDtoPlay)
+    print("playing " .. SoundIDtoPlay)
+end
+
+task.spawn(function()
+    while true do
+        task.wait()
+        MainLoop()
+    end
+end)
+
+
+local function forLoopForList(List, func, ListToPut)
+    for i = 1, #List do
+        task.spawn(function()
+            local plr = List[i]
+            func(ListToPut, plr)
+        end)
+    end
+end
+
+local function forLoopForListUserID(List, func, ListToPut)
+    for i = 1, #List do
+        task.spawn(function()
+            local plr = List[i]
+            func(ListToPut, plr.UserId)
+        end)
+    end
+end
+
+
+local function crashfunction() --thanks for leaking inter crash, now my script is finished!
+    local Character = LocalPlayer.Character
+    local Backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not (Character and Backpack) then return end
+    local AligatorGear = Backpack:FindFirstChild("Balligator") or Character:FindFirstChild("Balligator")
+    local Intergalatic = Backpack:FindFirstChild("SpaceSword") or Backpack:FindFirstChild("SpaceSword")
+    if not (AligatorGear and Intergalatic) then return end
+    if AligatorGear.Parent == Backpack then
+        AligatorGear.Parent = Character
+    end
+    if Intergalatic.Parent == Backpack then
+        Intergalatic.Parent = Character
+    end
+    AligatorGear:WaitForChild("Remote", 5):WaitForChild("Spawn", 5):InvokeServer()
+    local aligator = Character:FindFirstChildOfClass("Model")
+    aligator:PivotTo(CFrame.new(Vector3.new(8610111412132831051081081215851, 8610111412132831051081081215851,
+        8610111412132831051081081215851)))
+    Intergalatic:WaitForChild("ControlFunction", 5):InvokeServer("KeyDown", "q")
+end
+
+
+
+local bindable = Instance.new("BindableFunction")
+function bindable.OnInvoke(response)
+    if response == "Get gears and crash" then
+        ToggleAsset(292969458)
+        ToggleAsset(170903610)
+        task.wait(0.1)
+        crashfunction()
+    end
+    if response == "get required gear" then
+        ToggleAsset(53623322)
+    end
+    if response == "get blind staff" then
+        ToggleAsset(69210321)
+    end
+    if response == "get pink" then
+        ToggleAsset(106064277) --cupid blade
+        task.wait(0.1)
+        ColorAllParts("Charming Blade")
+    end
+    if response == "get green" then
+        ToggleAsset(108153884) --lucky hammer
+        task.wait(0.1)
+
+        ColorAllParts("CloverHammer")
+    end
+    if response == "get gold" then
+        ToggleAsset(1469987740) -- bloxxy 1018
+        task.wait(0.1)
+        ColorAllParts("2018BloxyAward")
+    end
+end
+
+local function requestGear(gearCallback)
+    StarterGui:SetCore("SendNotification", {
+        Title = "Missing Gears",
+        Text = "get required gear and try again.",
+        Duration = 10,
+        Callback = bindable,
+        Button1 = gearCallback,
+        Button2 = "Nevermind"
+    })
+end
+
+local function equiptoolandColor(tool)
+    local char, backpack = GetCharacterAndBackpack()
+    local foundTool = char:FindFirstChild(tool) or backpack:FindFirstChild(tool)
+    if foundTool then
+        ColorAllParts(tool)
+        return
+    end
+    if tool == "Charming Blade" then
+        requestGear("get pink")
+    elseif tool == "CloverHammer" then
+        requestGear("get green")
+    elseif tool == "2018BloxyAward" then
+        requestGear("get gold")
+    end
+end
+
+local function equipHadesStaffAndActivateAndBlind(List)
+    if #List == 0 then return end
+    local mychar = LocalPlayer.Character
+    local Backpack = LocalPlayer:FindFirstChild("Backpack")
+    local Humanoid = mychar:FindFirstChildOfClass("Humanoid")
+    if not (mychar and Backpack and Humanoid) then return end
+    local tool = mychar:FindFirstChild("HadesStaff") or Backpack:FindFirstChild("HadesStaff")
+    if not tool then
+        requestGear("get blind staff")
+        return
+    end
+    if tool.Parent == Backpack then
+        Humanoid:EquipTool(tool)
+    end
+    kill(List)
+    task.wait(0.3)
+    tool:Activate()
+    local fak, snowflake = pcall(function()
+        return GetHadesStaffSnowFlake()
+    end)
+    if snowflake then
+        task.spawn(function()
+            for i = 1, #List do
+                task.spawn(function()
+                    local v = List[i]
+                    if not v or v == LocalPlayer then return end
+                    local char = v.Character
+                    if not char then return end
+                    local head = char:FindFirstChild("Head")
+                    if not head then return end
+                    TouchAndUnTouch(head, snowflake)
+                end)
+            end
+        end)
+    end
+    task.wait(0.1)
+    if tool.Parent == mychar then
+        tool.Parent = Backpack
+    end
+end
+
+adminCommands["blind"] = function(payload)
+    local player = payload["player"]
+    local data = payload["data"]
+    if player and data then
+        local findplayers = FindPlayers(player, data[1])
+        if findplayers then
+            equipHadesStaffAndActivateAndBlind()
+        end
+    end
+end
+
+local function CrashCommand()
+    local Character = LocalPlayer.Character
+    local Backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not (Character and Backpack) then return end
+    local AligatorGear = Backpack:FindFirstChild("Balligator") or Character:FindFirstChild("Balligator")
+    local Intergalatic = Backpack:FindFirstChild("SpaceSword") or Backpack:FindFirstChild("SpaceSword")
+    if (AligatorGear and Intergalatic) then
+        crashfunction()
+    else
+        StarterGui:SetCore("SendNotification", {
+            Title = "Missing Gears",
+            Text = "Intergalactic Sword, From the Vault: Alligator Plushie",
+            Duration = 10,
+            Callback = bindable,
+            Button1 = "Get gears and crash",
+            Button2 = "Nevermind"
+        })
+    end
+end
+
+adminCommands["crash"] = function(payload)
+    local player = payload["player"]
+    if player then
+        CrashCommand()
+    end
+end
+
 local function equipSorcusAndActivate()
     local char, backpack = GetCharacterAndBackpack()
     local sword = equiptool("SorcusSword")
-    if not sword then return end
+    if not sword then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Missing Gears",
+            Text = "get required gear and try again.",
+            Duration = 10,
+            Callback = bindable,
+            Button1 = "get required gear",
+            Button2 = "Nevermind"
+        })
+        return
+    end
     if sword.Parent == char then
         sword:WaitForChild("Input", 5):FireServer("Key", true, { Name = "x" })
     end
@@ -841,126 +1353,20 @@ local function walkspeed(list, spd)
     equipSorcusAndActivate()
 end
 
-
-local function equipHadesStaffAndActivateAndBlind(List)
-    if #List == 0 then return end
-    local mychar = LocalPlayer.Character
-    local Backpack = LocalPlayer:FindFirstChild("Backpack")
-    local Humanoid = mychar:FindFirstChildOfClass("Humanoid")
-    if not (mychar and Backpack and Humanoid) then return end
-    local tool = mychar:FindFirstChild("HadesStaff") or Backpack:FindFirstChild("HadesStaff")
-    if not tool then return end
-    if tool.Parent == Backpack then
-        Humanoid:EquipTool(tool)
-    end
-    kill(List)
-    task.wait(0.3)
-    tool:Activate()
-    local fak, snowflake = pcall(function()
-        return GetHadesStaffSnowFlake()
-    end)
-    if snowflake then
-        task.spawn(function()
-            for i = 1, #List do
-                task.spawn(function()
-                    local v = List[i]
-                    if not v or v == LocalPlayer then return end
-                    local char = v.Character
-                    if not char then return end
-                    local head = char:FindFirstChild("Head")
-                    if not head then return end
-                    TouchAndUnTouch(head, snowflake)
-                end)
-            end
-        end)
-    end
-    task.wait(0.1)
-    if tool.Parent == mychar then
-        tool.Parent = Backpack
-    end
-end
-
-local function CountMap(map)
-    local count = 0
-    for k, v in pairs(map) do
-        count = count + 1
-    end
-    return count
-end
-
-local function findValueOfIndex(index, table)
-    local ans = nil
-    local count = 0
-    for k, v in pairs(table) do
-        count = count + 1
-        if count == index then
-            ans = v
-            break
+adminCommands["speed"] = function(payload)
+    local player = payload["player"]
+    local data = payload["data"]
+    if player and data then
+        local findplayers = FindPlayers(player, data[1])
+        if findplayers then
+            walkspeed(findplayers, data[2])
         end
     end
-    return ans
 end
 
-local MusicList = { ["Alkline Tears"] = 73718692864423 }
-
-
-local function playMusic(songid)
-    pcall(function()
-        local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-        if not Character then return end
-        local backpack = LocalPlayer:WaitForChild("Backpack", 2)
-        if not backpack then return end
-        local boombox = backpack:WaitForChild("SuperFlyGoldBoombox", 2)
-        if not boombox then return end
-        boombox.Parent = Character
-        Character.SuperFlyGoldBoombox.Remote:FireServer("PlaySong", tonumber(songid))
-        boombox.DescendantAdded:wait()
-        task.wait()
-        boombox.Parent = backpack
-        local Sound = boombox:FindFirstChildWhichIsA("Sound", true)
-        repeat task.wait() until not Sound.IsPlaying
-        Sound:Play()
-        Sound.TimePosition = Settings.Time
-    end)
-end
-
-local function playRandomMusic()
-    local randomNum = math.random(1, CountMap(MusicList))
-    SoundIDtoPlay = findValueOfIndex(randomNum, MusicList)
-    playMusic(SoundIDtoPlay)
-    print("playing " .. SoundIDtoPlay)
-end
-
-task.spawn(function()
-    while true do
-        task.wait()
-        MainLoop()
-    end
-end)
-
-local function checkPermisson(v)
-    return (whitelist[v] or table.find(LocalPlayerWhiteList, v))
-end
-local function forLoopForList(List, func, ListToPut)
-    for i = 1, #List do
-        task.spawn(function()
-            local plr = List[i]
-            func(ListToPut, plr)
-        end)
-    end
-end
-
-local function forLoopForListUserID(List, func, ListToPut)
-    for i = 1, #List do
-        task.spawn(function()
-            local plr = List[i]
-            func(ListToPut, plr.UserId)
-        end)
-    end
-end
 
 local function AnchorPlayer()
-    ReplicatedStorage.Remotes.ToggleAsset:InvokeServer(49491808)
+    ToggleAsset(49491808)
     local backpack = LocalPlayer:WaitForChild("Backpack", 2)
     local Character = LocalPlayer.Character
     local Humanoid = Character:WaitForChild("Humanoid", 2)
@@ -971,14 +1377,106 @@ local function AnchorPlayer()
         if Tool.Parent == Character then
             Tool:Activate()
         end
-        ReplicatedStorage.Remotes.ToggleAsset:InvokeServer(49491808)
+        ToggleAsset(49491808)
+    end
+end
+
+adminCommands["toggleanchor"] = function(payload)
+    if anchorWhenRespawn == false then
+        AnchorPlayer()
+        anchorWhenRespawn = true
+    else
+        anchorWhenRespawn = false
+    end
+end
+
+adminCommands["togglecrash"] = function(payload)
+    if autocrash then
+        autocrash = false
+    else
+        autocrash = true
+        CrashCommand()
+        task.wait(0.1)
+        while autocrash do
+            task.wait()
+            pcall(function()
+                crashfunction()
+            end)
+        end
+    end
+end
+
+adminCommands["togglekillmethod"] = function()
+    LegacyKillMethod = not LegacyKillMethod
+end
+
+adminCommands["debug"] = function(payload)
+    local messages = payload["data"]
+    for i in pairs(messages) do
+        print(i .. v)
+    end
+end
+
+adminCommands["toggleantiplatform"] = function()
+    Notify("expermential", "may not work")
+    if PlatformConnection then
+        PlatformConnection:Disconnect()
+        PlatformConnection = nil
+    else
+        PlatformConnection = RunService.Heartbeat:Connect(function()
+            for _, v in pairs(Players:GetPlayers()) do
+                task.spawn(function()
+                    if v ~= LocalPlayer then
+                        pcall(function()
+                            local char = v.Character
+                            if not char then return end
+                            local root = char:FindFirstChild("HumanoidRootPart")
+                            if not root then return end
+                            root.Size = Vector3.new(100, 100, 100)
+                            root.CanCollide = false
+                        end)
+                    end
+                end)
+            end
+        end)
     end
 end
 
 local destroyList = { ["Rocket"] = true, ["Explosion"] = true }
-local function processCommands(UserID, str)
-    local Rocketconnection = nil
-    local PlatformConnection = nil
+
+
+adminCommands["togglehiderockets"] = function()
+    if not Rocketconnection then
+        Rocketconnection = Workspace.ChildAdded:Connect(function(v)
+            if destroyList[v.Name] then
+                task.wait()
+                v:Remove()
+            end
+        end)
+    else
+        Rocketconnection:Disconnect()
+        Rocketconnection = nil
+    end
+end
+
+adminCommands["pink"] = function()
+    equiptoolandColor("Charming Blade")
+end
+adminCommands["green"] = function()
+    equiptoolandColor("CloverHammer")
+end
+adminCommands["gold"] = function()
+    equiptoolandColor("2018BloxyAward")
+end
+
+adminCommands["cmds"] = function()
+    Notify("Check console", "/console in chat")
+    for i, _ in adminCommands do
+        print(i)
+    end
+end
+
+local function processCommands(UserID, str) --parse
     local uncleanedstring = str
     local Chatter = Players:GetPlayerByUserId(UserID)
     local lowerstring = uncleanedstring:lower()
@@ -999,6 +1497,8 @@ local function processCommands(UserID, str)
                 killaura(plr)
             end)
         end
+    elseif command == "changekillmethod" then
+        LegacyKillMethod = not LegacyKillMethod
     elseif command == "unkillaura" then
         local targets = FindPlayers(Chatter, split[2])
         if not targets then return end
@@ -1006,34 +1506,31 @@ local function processCommands(UserID, str)
             RemoveFromList(killAuraList, v.Name)
         end
     elseif command == "antiplatform" then --may not work very expermential
-        if PlatformConnection then return end
-        PlatformConnection = RunService.Heartbeat:Connect(function()
-            for _, v in pairs(Players:GetPlayers()) do
-                task.spawn(function()
-                    if v ~= LocalPlayer then
-                        pcall(function()
-                            local char = v.Character
-                            local root = char:FindFirstChild("HumanoidRootPart")
-                            root.Size = Vector3.new(100, 100, 100)
-                            root.CanCollide = false
-                        end)
-                    end
-                end)
-            end
-        end)
+        if split[2] == "false" then
+            if not PlatformConnection then return end
+            PlatformConnection:Disconnect()
+            PlatformConnection = nil
+        else
+            if PlatformConnection then return end
+            PlatformConnection = RunService.Heartbeat:Connect(function()
+                for _, v in pairs(Players:GetPlayers()) do
+                    task.spawn(function()
+                        if v ~= LocalPlayer then
+                            pcall(function()
+                                local char = v.Character
+                                local root = char:FindFirstChild("HumanoidRootPart")
+                                root.Size = Vector3.new(100, 100, 100)
+                                root.CanCollide = false
+                            end)
+                        end
+                    end)
+                end
+            end)
+        end
     elseif command == "debug" then
         for i, v in pairs(split) do
             print(i .. ", " .. v)
         end
-    elseif command == "startanchor" then
-        AnchorPlayer()
-        anchorWhenRespawn = true
-    elseif command == "stopanchor" then
-        anchorWhenRespawn = false
-    elseif command == "unantiplatform" then
-        if not PlatformConnection then return end
-        PlatformConnection:Disconnect()
-        PlatformConnection = nil
     elseif command == "pink" then
         equiptoolandColor("Charming Blade")
     elseif command == "green" then
@@ -1059,7 +1556,39 @@ local function processCommands(UserID, str)
     elseif command == "explode" then
         local targets = FindPlayers(Chatter, split[2])
         if not targets then return end
-        fireRocket(targets)
+        Explode(targets)
+    elseif command == "autocrash" then
+        local bool = split[2]
+        if bool == "false" then
+            autocrash = false
+        else
+            autocrash = true
+            CrashCommand()
+            task.wait(0.1)
+            while autocrash do
+                task.wait()
+                pcall(function()
+                    crashfunction()
+                end)
+            end
+        end
+    elseif command == "crash" then
+        CrashCommand()
+    elseif command == "autokill" then
+        local bool = split[2]
+        if bool == "false" then
+            killnewplayers = false
+        else
+            killnewplayers = true
+        end
+    elseif command == "autoanchor" then
+        local bool = split[2]
+        if bool == "false" then
+            anchorWhenRespawn = false
+        else
+            anchorWhenRespawn = true
+            AnchorPlayer()
+        end
     elseif command == "loopkill" then
         local targets = FindPlayers(Chatter, split[2])
         if not targets then return end
@@ -1076,14 +1605,14 @@ local function processCommands(UserID, str)
         for i = 1, #targets do
             local plr = targets[i]
             task.spawn(function()
-                baseProtectfun(plr)
+                baseprotection(plr)
             end)
         end
     elseif command == "unbp" then
         local targets = FindPlayers(Chatter, split[2])
         if not targets then return end
         for i, v in targets do
-            RemoveFromList(baseProtect, v.Name)
+            RemoveFromList(baseProtectionList, v.Name)
         end
     elseif command == "loopgod" then
         local targets = FindPlayers(Chatter, split[2])
@@ -1125,12 +1654,12 @@ local function processCommands(UserID, str)
     elseif command == "loopexplode" then
         local targets = FindPlayers(Chatter, split[2])
         if targets then
-            forLoopForList(targets, insertToList, RocketList)
+            forLoopForList(targets, insertToList, ExplodeList)
         end
     elseif command == "unloopexplode" then
         local targets = FindPlayers(Chatter, split[2])
         if targets then
-            forLoopForList(targets, RemoveFromList, RocketList)
+            forLoopForList(targets, RemoveFromList, ExplodeList)
         end
     elseif command == "god" then
         local targets = FindPlayers(Chatter, split[2])
@@ -1138,7 +1667,9 @@ local function processCommands(UserID, str)
             infhp(targets)
         end
     elseif command == "cmds" then
-        Chat("/w " .. Chatter.Name .. " commands: kill, damage, god, ")
+        print([[ crash, loopkill target, unloopkill target,
+        ]])
+        Notify("type /console in chat", "to view some commands")
     elseif command == "whitelist" then
         local targets = FindPlayers(Chatter, split[2])
         if targets then
@@ -1178,7 +1709,10 @@ TextChatService.MessageReceived:Connect(function(messageInstance)
     local UserId = messageInstance.TextSource.UserId
     if not ((UserId and checkPermisson(UserId)) or publicMode) then return end
     local msg = messageInstance.Text
-    processCommands(UserId, msg)
+    if UserId and msg then
+        --processCommands(UserId, msg) --Old verison if you wanna use
+        adminCommands.parse(UserId, msg)
+    end
 end)
 
 local function CheckForBlackListKill(v)
@@ -1201,7 +1735,7 @@ local function RemoveMyBaseForceField(Player)
 end
 
 Players.PlayerRemoving:Connect(function(v)
-    RemoveFromList(baseProtect, v.Name)
+    RemoveFromList(baseProtectionList, v.Name)
     RemoveFromList(killAuraList, v.Name)
     RemoveFromList(FFkillList, v)
 end)
@@ -1222,6 +1756,10 @@ end)
 
 local function PlayerJoinedSetUp(v)
     CheckForBlackListKill(v)
+    if killnewplayers then
+        insertToList(LoopkillList, v)
+        insertToList(loopkillRejoinProof, v.UserId)
+    end
 end
 
 for _, v in pairs(Players:GetPlayers()) do
@@ -1232,9 +1770,9 @@ Players.PlayerAdded:Connect(function(v)
     PlayerJoinedSetUp(v)
 end)
 
-task.spawn(function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false) end)
+task.spawn(function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false) end) --disable red blood mark when dies
 
-task.spawn(function()
+task.spawn(function()                                                                   --anti afk script
     pcall(function()
         task.wait(60)
         Players.LocalPlayer.Idled:Connect(function()
@@ -1248,13 +1786,19 @@ print("finished connecting!")
 
 if game.PlaceId == 26838733 then
     if creator then
-        --ReplicatedStorage.Remotes.BecomeAvatar:FireServer("1967676620") --for the cool avatar!
+        Remotes.BecomeAvatar:FireServer("1967676620") --for the cool avatar!
     end
     task.wait(1)
+    --ballingator and intergalatic
+    ToggleAsset(292969458)
+    ToggleAsset(170903610)
+
+--gears that kill
     ToggleAsset(34898883)  --Positronic-Platform-Producer
     ToggleAsset(68539623)  --Korblox-Sword-and-Shield
     ToggleAsset(173755801) --Diamond-Blade-Sword
     ToggleAsset(169602103) -- Seranoks-Rocket-Jumper
+--else
     --[[
     ToggleAsset(69210321)   --Hades-Staff-of-Darkness-A-Gamestop-Exclusive
     ToggleAsset(106064277)  --cupid blade
@@ -1262,11 +1806,11 @@ if game.PlaceId == 26838733 then
     ToggleAsset(1469987740) -- bloxxy 1018
     ToggleAsset(53623322)   -- sorcus sword
     ToggleAsset(212641536)  -- boombox
+
     ]] --
 end
 
-StarterGui:SetCore("SendNotification", {
-    Title = "Script Loaded!",
-    Text = "I'm so silly :3",
-    Duration = 5,
-})
+
+Notify("Script Loaded!", "I'm so silly :3")
+
+Notify("How to use", "Type " .. prefix .. "cmds to for a list of commands")
