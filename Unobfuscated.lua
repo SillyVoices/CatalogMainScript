@@ -1,7 +1,7 @@
+--I am aware that it is unorganize as hell, and doesn't scale well.
 if game.PlaceId ~= 26838733 then return end
 if AmeChan then return end
 pcall(function() getgenv().AmeChan = true end)
-
 local prefix               = "!"
 local Players              = game:GetService("Players")
 local RunService           = game:GetService("RunService")
@@ -15,6 +15,21 @@ local LocalPlayer          = Players.LocalPlayer
 local PlayerGui            = LocalPlayer:WaitForChild("PlayerGui", 4)
 local BlindGuisTable       = { ScreenFog = true, DarknessGui = true, VolleyballScreenGui = true, FlashBangEffect = true }
 local LocalPlayerWhiteList = { LocalPlayer.UserId }
+local gearTable            = {
+    ["Diamond Blade Sword"] = { ["name"] = "Diamond Blade Sword", ["id"] = 173755801 },
+    ["HadesStaff"] = { ["name"] = "HadesStaff", ["id"] = 69210321 },
+    ["Charming Blade"] = { ["name"] = "Charming Blade", ["id"] = 106064277 },
+    ["CloverHammer"] = { ["name"] = "CloverHammer", ["id"] = 108153884 },
+    ["2018BloxyAward"] = { ["name"] = "2018BloxyAward", ["id"] = 1469987740 },
+    ["SpaceSword"] = { ["name"] = "SpaceSword", ["id"] = 170903610 },
+    ["Balligator"] = { ["name"] = "Balligator", ["id"] = 292969458 },
+    ["KorbloxSwordAndShield"] = { ["name"] = "KorbloxSwordAndShield", ["id"] = 68539623 },
+    ["StepGun"] = { ["name"] = "StepGun", ["id"] = 34898883 },
+    ["SuperFlyGoldBoombox"] = { ["name"] = "SuperFlyGoldBoombox", ["id"] = 212641536 },
+    ["RocketJumper"] = { ["name"] = "RocketJumper", ["id"] = 169602103 },
+    ["SorcusSword"] = { ["name"] = "SorcusSword", ["id"] = 53623322 },
+    ["StaffOfPitFire"] = { ["name"] = "StaffOfPitFire", ["id"] = 49491808 }
+}
 local adminCommands        = {}
 local LoopkillList         = {}
 local LoopGodList          = {}
@@ -30,7 +45,6 @@ local autocrash            = false
 local LegacyKillMethod     = true  --this makes the script more stable and reduces crashes
 local creator              = false --this gives avatar
 local publicMode           = false --this makes that everyone can use your commands
-local chatCooldown         = false
 local Rocketconnection     = nil
 local PlatformConnection   = nil
 local NaN                  = 0 / 0
@@ -438,26 +452,6 @@ local function infhp(table)
     end
 end
 
-adminCommands["god"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"][1]
-    if player and target then
-        infhp(FindPlayers(target))
-    end
-end
-
-
-adminCommands["loopgod"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"][1]
-    if player and target then
-        local findtargets = FindPlayers(target)
-        if findtargets == nil then return end
-        for i, v in pairs(findtargets) do
-            insertToList(LoopGodList, v)
-        end
-    end
-end
 
 local PlatformCooldown = false
 
@@ -500,38 +494,7 @@ local function Explode(List)
     end
 end
 
-adminCommands["loopexplode"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"][1]
-    if player and target then
-        local findtargets = FindPlayers(target)
-        if findtargets == nil then return end
-        for i, v in pairs(findtargets) do
-            insertToList(ExplodeList, v)
-        end
-    end
-end
 
-adminCommands["unloopexplode"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"][1]
-    if player and target then
-        local findtargets = FindPlayers(target)
-        if findtargets == nil then return end
-        for i, v in pairs(findtargets) do
-            RemoveFromList(ExplodeList, v)
-        end
-    end
-end
-adminCommands["explode"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"][1]
-    if player and target then
-        local findtargets = FindPlayers(target)
-        if findtargets == nil then return end
-        Explode(findtargets)
-    end
-end
 
 
 local function GetStickeyStep()
@@ -661,18 +624,49 @@ local function kill(table)
     end)
 end
 
+local function isGearExist(gearName)
+    local char, backpack = GetCharacterAndBackpack()
+    if not char and backpack then return nil end
+    return (backpack:FindFirstChild(gearName) ~= nil or char:FindFirstChild(gearName) ~= nil)
+end
 
-adminCommands["loopkill"] = function(payload)
+
+
+adminCommands["loopexplode"] = function(payload)
     local player = payload["player"]
-    local target = payload["data"]
+    local target = payload["data"][1]
+
     if player and target then
-        local findtargets = FindPlayers(player, target[1])
+        local findtargets = FindPlayers(target)
         if findtargets == nil then return end
         for i, v in pairs(findtargets) do
-            insertToList(LoopkillList, v)
+            insertToList(ExplodeList, v)
         end
     end
 end
+
+
+adminCommands["god"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    if player and target then
+        infhp(FindPlayers(target))
+    end
+end
+
+
+adminCommands["loopgod"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    if player and target then
+        local findtargets = FindPlayers(target)
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            insertToList(LoopGodList, v)
+        end
+    end
+end
+
 
 adminCommands["unloopkill"] = function(payload)
     local player = payload["player"]
@@ -686,15 +680,7 @@ adminCommands["unloopkill"] = function(payload)
         end
     end
 end
-adminCommands["kill"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        kill(findtargets)
-    end
-end
+
 local function checkPermisson(v)
     return (whitelist[v] or table.find(LocalPlayerWhiteList, v))
 end
@@ -754,67 +740,6 @@ local function sendDiamondRemoteToPlayersTable(remote, targets, damage)
     end
 end
 
-local function dealDamage(table, dmg)
-    if #table == 0 then return end
-    local DamageToDeal = number(dmg)
-    local remote = GetDiamondRemote()
-    if remote then
-        sendDiamondRemoteToPlayersTable(remote, table, DamageToDeal)
-    end
-end
-
-adminCommands["damage"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        dealDamage(findtargets, target[2])
-    end
-end
-
-local function nanHealth(table)
-    if #table == 0 then return end
-    local remote = GetDiamondRemote()
-    if remote then
-        sendDiamondRemoteToPlayersTable(remote, table, NaN)
-    end
-end
-
-adminCommands["nan"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        nanHealth(findtargets)
-    end
-end
-
-adminCommands["save"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        for i, v in pairs(findtargets) do
-            insertToList(saveList, v)
-        end
-    end
-end
-
-adminCommands["unsave"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        for i, v in pairs(findtargets) do
-            RemoveFromList(saveList, v)
-        end
-    end
-end
-
 local function checkTrueIfInList(tbl, playerName, plr)
     return (table.find(tbl, playerName) ~= nil and plr ~= nil)
 end
@@ -863,27 +788,7 @@ local function killaura(myPlayer)
     end
 end
 
-adminCommands["killaura"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        killaura(findtargets)
-    end
-end
 
-adminCommands["unkillaura"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        for _, v in pairs(findtargets) do
-            RemoveFromList(killAuraList, v.Name)
-        end
-    end
-end
 
 local function baseprotection(myPlayer)
     local hitboxsize = Vector3.new(60, 60, 60)
@@ -928,27 +833,11 @@ local function baseprotection(myPlayer)
         cleanUp:Destroy()
     end
 end
-
-
-adminCommands["bp"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        baseprotection(findtargets)
-    end
-end
-
-adminCommands["unbp"] = function(payload)
-    local player = payload["player"]
-    local target = payload["data"]
-    if player and target then
-        local findtargets = FindPlayers(player, target[1])
-        if findtargets == nil then return end
-        for _, v in pairs(findtargets) do
-            RemoveFromList(baseProtectionList, v.Name)
-        end
+local function nanHealth(table)
+    if #table == 0 then return end
+    local remote = GetDiamondRemote()
+    if remote then
+        sendDiamondRemoteToPlayersTable(remote, table, NaN)
     end
 end
 
@@ -977,7 +866,6 @@ local function MainLoop()
     end)
 end
 
-local ColorNameIdTable = { ["Diamond Blade Sword"] = 173755801 }
 
 
 local function getGearFromCatalog(gearId, gearName) --unused
@@ -1182,6 +1070,9 @@ function bindable.OnInvoke(response)
         task.wait(0.1)
         ColorAllParts("2018BloxyAward")
     end
+    if gearTable[response] then
+        ToggleAsset(gearTable[response]["id"])
+    end
 end
 
 local function requestGear(gearCallback)
@@ -1282,6 +1173,27 @@ local function CrashCommand()
         })
     end
 end
+adminCommands["unloopexplode"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+    if player and target then
+        local findtargets = FindPlayers(target)
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            RemoveFromList(ExplodeList, v)
+        end
+    end
+end
+adminCommands["explode"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"][1]
+
+    if player and target then
+        local findtargets = FindPlayers(target)
+        if findtargets == nil then return end
+        Explode(findtargets)
+    end
+end
 
 adminCommands["crash"] = function(payload)
     CrashCommand()
@@ -1306,7 +1218,7 @@ local function equipSorcusAndActivate()
     end
     sword.Parent = backpack
     task.wait(0.6)
-    RetoggleGear(53623322)
+    RetoggleGear(gearTable["SorcusSword"]["id"])
 end
 
 local function walkspeed(list, spd)
@@ -1348,12 +1260,22 @@ local function walkspeed(list, spd)
     equipSorcusAndActivate()
 end
 
+
+local function checkAndGetGear(gearName)
+    pcall(function()
+        task.spawn(function()
+            if not isGearExist(gearName) then
+                requestGear(gearTable[gearName]["name"])
+            end
+        end)
+    end)
+end
+
+
 adminCommands["speed"] = function(payload)
     local player = payload["player"]
     local data = payload["data"]
-    for i, v in pairs(data) do
-        print(i .. v)
-    end
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
     if player and data then
         local findplayers = FindPlayers(player, data[1])
         if findplayers then
@@ -1362,6 +1284,132 @@ adminCommands["speed"] = function(payload)
     end
 end
 
+adminCommands["killaura"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        killaura(findtargets)
+    end
+end
+
+adminCommands["unkillaura"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for _, v in pairs(findtargets) do
+            RemoveFromList(killAuraList, v.Name)
+        end
+    end
+end
+
+
+adminCommands["nan"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        nanHealth(findtargets)
+    end
+end
+
+adminCommands["save"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            insertToList(saveList, v)
+        end
+    end
+end
+
+adminCommands["unsave"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for i, v in pairs(findtargets) do
+            RemoveFromList(saveList, v)
+        end
+    end
+end
+
+adminCommands["bp"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        baseprotection(findtargets)
+    end
+end
+
+adminCommands["unbp"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for _, v in pairs(findtargets) do
+            RemoveFromList(baseProtectionList, v.Name)
+        end
+    end
+end
+
+adminCommands["kill"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        kill(findtargets)
+    end
+end
+local function dealDamage(table, dmg)
+    if #table == 0 then return end
+    local DamageToDeal = number(dmg)
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    local remote = GetDiamondRemote()
+    if remote then
+        sendDiamondRemoteToPlayersTable(remote, table, DamageToDeal)
+    end
+end
+
+adminCommands["damage"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        dealDamage(findtargets, target[2])
+    end
+end
 
 local function AnchorPlayer()
     ToggleAsset(49491808)
@@ -1442,6 +1490,23 @@ adminCommands["toggleantiplatform"] = function()
     end
 end
 
+adminCommands["loopkill"] = function(payload)
+    local player = payload["player"]
+    local target = payload["data"]
+    checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
+
+
+    if player and target then
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets == nil then return end
+        for _, v in pairs(findtargets) do
+            task.spawn(function()
+                insertToList(LoopkillList, v)
+            end)
+        end
+    end
+end
+
 local destroyList = { ["Rocket"] = true, ["Explosion"] = true }
 
 
@@ -1458,6 +1523,7 @@ adminCommands["togglehiderockets"] = function()
         Rocketconnection = nil
     end
 end
+
 
 adminCommands["pink"] = function()
     equiptoolandColor("Charming Blade")
@@ -1790,14 +1856,14 @@ if game.PlaceId == 26838733 then
     end
     task.wait(1)
     --ballingator and intergalatic
-    ToggleAsset(292969458)
-    ToggleAsset(170903610)
+    ToggleAsset(gearTable["Balligator"]["id"])
+    ToggleAsset(gearTable["SpaceSword"]["id"])
 
     --gears that kill
-    ToggleAsset(34898883)  --Positronic-Platform-Producer
-    ToggleAsset(68539623)  --Korblox-Sword-and-Shield
-    ToggleAsset(173755801) --Diamond-Blade-Sword
-    ToggleAsset(169602103) -- Seranoks-Rocket-Jumper
+    ToggleAsset(gearTable["StepGun"]["id"])               --Positronic-Platform-Producer
+    ToggleAsset(gearTable["KorbloxSwordAndShield"]["id"]) --Korblox-Sword-and-Shield
+    ToggleAsset(gearTable["Diamond Blade Sword"]["id"])   --Diamond-Blade-Sword
+    ToggleAsset(gearTable["RocketJumper"]["id"])          -- Seranoks-Rocket-Jumper
     --else
     --[[
     ToggleAsset(69210321)   --Hades-Staff-of-Darkness-A-Gamestop-Exclusive
