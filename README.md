@@ -2,10 +2,10 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/SillyVoices/CatalogMainScript/main/Unobfuscated.lua"))()
 
 # Usage
-The default prefix is "!" and you can change it by editing the prefix varible. Script usage examples: !loopkill all, !speed others 100, !cmds.
+The default prefix is "!" and you can change it by editing the prefix varible. Script usage examples: !loopkill all, !speed others 100, !cmds, !crash
 
 # Commands
-speed, killaura, unkillaura, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, crash, cmds,
+speed, killaura, unkillaura, pink, green, gold, kill, nan, playmusic, explode, loopkill, unloopkill, bp, unbp, loopgod, unloopgod, blind, save, unsave, removerockets, unremoverockets, loopexplode, unloopexplode, god, whitelist, unwhitelist, damage, crash, cmds, 
 # Targets
 me, all, others, hackers, PlayerName/DisplayName, bacons. 
 
