@@ -1585,10 +1585,11 @@ adminCommands["gold"] = function()
 end
 
 adminCommands["cmds"] = function()
-    Notify("Check console", "/console in chat")
+    print("Commands below")
     for i, _ in adminCommands do
         print(i)
     end
+    StarterGui:SetCore("DevConsoleVisible", true)
 end
 
 local function processCommands(UserID, str) --parse
