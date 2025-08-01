@@ -1,6 +1,7 @@
 if game.PlaceId ~= 26838733 then return end
 if AmeChan then return end
 pcall(function() getgenv().AmeChan = true end)
+
 local prefix               = "!"
 local Players              = game:GetService("Players")
 local RunService           = game:GetService("RunService")
@@ -71,7 +72,7 @@ end
 
 Notify("Catalog Heaven Admin Script; verison july 31 2025", "Loading script..." .. "\nPrefix is" .. " {" .. prefix .. "}")
 
-print("I dropped this silly bombshell on july, 31, 2025, this script may be patched if seranok some how rise from the grave and patch it.")
+
 local function number(str)
     if str == nil then
         return 0 / 0
@@ -102,7 +103,7 @@ end
 
 
 local function FindPlayers(Me, input)
-    local Loosers = {}
+    local foundTargets = {}
     if not input then
         print("No player input")
         return
@@ -111,16 +112,16 @@ local function FindPlayers(Me, input)
     local allplayers = Players:GetPlayers()
     if not target then return end
     if target == "all" then
-        Loosers = allplayers
+        foundTargets = allplayers
     elseif target == "me" then
-        table.insert(Loosers, Me)
+        table.insert(foundTargets, Me)
     elseif target == "hackers" then
         for i = 1, #allplayers do
             local plr = allplayers[i]
             local backpack = plr and plr:FindFirstChild("Backpack")
             local char = plr.Character
             if backpack and char and (backpack:FindFirstChild("Diamond Blade Sword") or backpack:FindFirstChild("RocketJumper") or char:FindFirstChild("RocketJumper") or char:FindFirstChild("Diamond Blade Sword")) then
-                table.insert(Loosers, plr)
+                table.insert(foundTargets, plr)
             end
         end
     elseif target == "blacks" or target == "colored" then
@@ -128,6 +129,7 @@ local function FindPlayers(Me, input)
             pcall(function()
                 local plr = allplayers[i]
                 local char = plr.Character
+                if not char then return end
                 local head = char:FindFirstChild("Head")
                 if head then
                     local headColor = head.Color
@@ -135,7 +137,7 @@ local function FindPlayers(Me, input)
                     local g = headColor.G * 255
                     local b = headColor.B * 255
                     if not (r > 200 and g > 80 and b > 10) then --Targets darker skin tone including brown and black.
-                        table.insert(Loosers, plr)
+                        table.insert(foundTargets, plr)
                     end
                 end
             end)
@@ -144,9 +146,11 @@ local function FindPlayers(Me, input)
         for i = 1, #allplayers do
             local plr = allplayers[i]
             local char = plr.Character
-            local condiction = char:FindFirstChild("Pal Hair")
-            if condiction then
-                table.insert(Loosers, plr)
+            if char then
+                local condiction = char:FindFirstChild("Pal Hair")
+                if condiction then
+                    table.insert(foundTargets, plr)
+                end
             end
         end
     elseif target == "nonhackers" then
@@ -155,67 +159,71 @@ local function FindPlayers(Me, input)
             local backpack = plr and plr:FindFirstChild("Backpack")
             local char = plr.Character
             if backpack and char and not (backpack:FindFirstChild("Diamond Blade Sword") or backpack:FindFirstChild("RocketJumper") or char:FindFirstChild("RocketJumper") or char:FindFirstChild("Diamond Blade Sword")) then
-                table.insert(Loosers, plr)
+                table.insert(foundTargets, plr)
             end
         end
     elseif target == "ff" then
         for i = 1, #allplayers do
             local plr = allplayers[i]
             local char = plr.Character
-            local condiction = char:FindFirstChild("ForceField")
-            if condiction then
-                table.insert(Loosers, plr)
+            if char then
+                local condiction = char:FindFirstChild("ForceField")
+                if condiction then
+                    table.insert(foundTargets, plr)
+                end
             end
         end
     elseif target == "others" then
         for i = 1, #allplayers do
             local plr = allplayers[i]
             if plr ~= Me then
-                table.insert(Loosers, plr)
+                table.insert(foundTargets, plr)
             end
         end
     else
         for i = 1, #allplayers do
             local plr = allplayers[i]
             if (string.sub(plr.Name:lower(), 1, #target) == target or string.sub(plr.DisplayName:lower(), 1, #target) == target) then
-                table.insert(Loosers, plr)
+                table.insert(foundTargets, plr)
             end
         end
     end
+
     task.spawn(function()
-        if #Loosers == 0 then return end
+        if #foundTargets == 0 then return end
         local namelist = {}
-        for i = 1, #Loosers do
-            local plr = Loosers[i]
+        for i = 1, #foundTargets do
+            local plr = foundTargets[i]
             table.insert(namelist, plr.Name)
         end
         local AllName = table.concat(namelist, ", ")
         print(Me.Name .. " called " .. AllName .. " with the input " .. input)
     end)
 
-    return Loosers
+    return foundTargets
 end
 
-
+local function removeFirstElement(tbl)
+    local tableToReturn = {}
+    for i = 1, #tbl do
+        if i ~= 1 then
+            table.insert(tableToReturn, tbl[i])
+        end
+    end
+    return tableToReturn
+end
 
 adminCommands.parse = function(UserID, text)
     local Player = Players:GetPlayerByUserId(UserID)
     local lowerstring = text:lower()
     if lowerstring:sub(1, 1) ~= prefix then return end
-    local split = string.sub(lowerstring, 2):split(" ")
-    local command = split[1]
-    if not command then return end
-    local payload = { ["player"] = Player, ["data"] = {} }
-    if #split <= 2 then
-        for i = 2, #split do
-            table.insert(payload.data, split[i])
-        end
-    end
-    if adminCommands[command] ~= nil then
+    local splitString = string.sub(lowerstring, 2):split(" ")
+    local command = splitString[1]
+    if adminCommands[command] then
+        local payload = { ["player"] = Player, ["data"] = removeFirstElement(splitString) }
         adminCommands[command](payload)
     end
 end
-
 
 local function ToggleAsset(id)
     ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("ToggleAsset"):InvokeServer(id)
@@ -224,12 +232,6 @@ end
 local function RetoggleGear(id)
     ToggleAsset(id)
     ToggleAsset(id)
-end
-
-function Chat(Message)
-    if not chatCooldown then
-        ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(Message, "ALL")
-    end
 end
 
 local function GetCharacterAndBackpack()
@@ -248,8 +250,6 @@ local function cleanball()
         end
     end
 end
-
-
 
 local function cleantouch(character)
     local tool = character:FindFirstChildOfClass("Tool")
@@ -420,8 +420,6 @@ end)
 if not success then
     print(err)
 end
-
-
 
 
 
@@ -1286,10 +1284,7 @@ local function CrashCommand()
 end
 
 adminCommands["crash"] = function(payload)
-    local player = payload["player"]
-    if player then
-        CrashCommand()
-    end
+    CrashCommand()
 end
 
 local function equipSorcusAndActivate()
@@ -1356,6 +1351,9 @@ end
 adminCommands["speed"] = function(payload)
     local player = payload["player"]
     local data = payload["data"]
+    for i, v in pairs(data) do
+        print(i .. v)
+    end
     if player and data then
         local findplayers = FindPlayers(player, data[1])
         if findplayers then
@@ -1412,8 +1410,10 @@ end
 
 adminCommands["debug"] = function(payload)
     local messages = payload["data"]
-    for i in pairs(messages) do
-        print(i .. v)
+    if messages then
+        for i, v in pairs(messages) do
+            print(i .. ", " .. v)
+        end
     end
 end
 
@@ -1793,12 +1793,12 @@ if game.PlaceId == 26838733 then
     ToggleAsset(292969458)
     ToggleAsset(170903610)
 
---gears that kill
+    --gears that kill
     ToggleAsset(34898883)  --Positronic-Platform-Producer
     ToggleAsset(68539623)  --Korblox-Sword-and-Shield
     ToggleAsset(173755801) --Diamond-Blade-Sword
     ToggleAsset(169602103) -- Seranoks-Rocket-Jumper
---else
+    --else
     --[[
     ToggleAsset(69210321)   --Hades-Staff-of-Darkness-A-Gamestop-Exclusive
     ToggleAsset(106064277)  --cupid blade
