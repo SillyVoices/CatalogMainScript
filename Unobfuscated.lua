@@ -629,10 +629,9 @@ end
 
 adminCommands["loopexplode"] = function(payload)
     local player = payload["player"]
-    local target = payload["data"][1]
-
+    local target = payload["data"]
     if player and target then
-        local findtargets = FindPlayers(target)
+        local findtargets = FindPlayers(player, target[1])
         if findtargets == nil then return end
         for i, v in pairs(findtargets) do
             insertToList(ExplodeList, v)
@@ -643,20 +642,23 @@ end
 
 adminCommands["god"] = function(payload)
     local player = payload["player"]
-    local target = payload["data"][1]
+    local target = payload["data"]
     if player and target then
-        infhp(FindPlayers(target))
+        local findtargets = FindPlayers(player, target[1])
+        if findtargets then
+        infhp(findtargets)
+        end
     end
 end
 
 
 adminCommands["loopgod"] = function(payload)
     local player = payload["player"]
-    local target = payload["data"][1]
+    local target = payload["data"]
     if player and target then
-        local findtargets = FindPlayers(target)
+        local findtargets = FindPlayers(player, target[1])
         if findtargets == nil then return end
-        for i, v in pairs(findtargets) do
+        for _, v in pairs(findtargets) do
             insertToList(LoopGodList, v)
         end
     end
