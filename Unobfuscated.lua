@@ -1585,7 +1585,7 @@ adminCommands["gold"] = function()
 end
 
 adminCommands["cmds"] = function()
-    print("Commands below")
+    print("Commands below, example of usage: !loopkill all")
     for i, _ in adminCommands do
         print(i)
     end
