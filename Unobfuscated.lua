@@ -1143,6 +1143,7 @@ end
 adminCommands["blind"] = function(payload)
     local player = payload["player"]
     local data = payload["data"]
+    Notify("Blind is expermential", "please open your base ForceField to not crash")
     if player and data then
         local findplayers = FindPlayers(player, data[1])
         if findplayers then
