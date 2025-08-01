@@ -646,7 +646,7 @@ adminCommands["god"] = function(payload)
     if player and target then
         local findtargets = FindPlayers(player, target[1])
         if findtargets then
-        infhp(findtargets)
+            infhp(findtargets)
         end
     end
 end
@@ -1099,6 +1099,60 @@ local function equiptoolandColor(tool)
     end
 end
 
+local function getEveryoneButLocalPlayer(List)
+    local NotLocalPlayers =  {}
+    for i = 1, #List do
+        local player = List[i]
+        if player ~= LocalPlayer then
+            table.insert(NotLocalPlayers,player)
+        end
+
+    end
+    return NotLocalPlayers
+end
+local function BlindStableVerison(List)
+    if #List == 0 then return end
+    local mychar = LocalPlayer.Character
+    local Backpack = LocalPlayer:FindFirstChild("Backpack")
+    local Humanoid = mychar:FindFirstChildOfClass("Humanoid")
+    local myTorso = mychar:FindFirstChild("Torso") or mychar:FindFirstChild("UpperTorso")
+    if not (mychar and Backpack and Humanoid and myTorso) then return end
+    local tool = mychar:FindFirstChild("HadesStaff") or Backpack:FindFirstChild("HadesStaff")
+    if not tool then
+        requestGear("get blind staff")
+        return
+    end
+    if tool.Parent == Backpack then
+        Humanoid:EquipTool(tool)
+    end
+    kill(getEveryoneButLocalPlayer(List))
+    task.wait(0.3)
+    tool:Activate()
+    for i = 1, #List do
+        task.spawn(function()
+            local player = List[i]
+            local char = player.Character
+            if not char then return end
+            local targetHumanoid = char:FindFirstChildOfClass("Humanoid")
+            if not targetHumanoid then return end
+            local head = char:FindFirstChild("Head")
+            if not head then return end
+            if targetHumanoid.Health == 0 then
+            head.Anchored = true
+            head.CFrame = myTorso.CFrame * CFrame.new(0, -5, 0)
+            head.Size = Vector3.new(100, 5, 50)
+            head.CanCollide = false
+            head.CanQuery = false
+            head.Transparency = 1
+            end
+        end)
+    end
+    task.wait(0.1)
+    if tool.Parent == mychar then
+        tool.Parent = Backpack
+    end
+end
+
 local function equipHadesStaffAndActivateAndBlind(List)
     if #List == 0 then return end
     local mychar = LocalPlayer.Character
@@ -1143,11 +1197,11 @@ end
 adminCommands["blind"] = function(payload)
     local player = payload["player"]
     local data = payload["data"]
-    Notify("Blind is expermential", "please open your base ForceField to not crash")
+    Notify("Blind is expermential", "please open your base ForceField work")
     if player and data then
         local findplayers = FindPlayers(player, data[1])
         if findplayers then
-            equipHadesStaffAndActivateAndBlind()
+            BlindStableVerison(findplayers)
         end
     end
 end
