@@ -256,7 +256,7 @@ end
 
 local function cleanball()
     for _, part in pairs(Workspace:GetChildren()) do
-        if part.Namexw == "Part" then
+        if part.Name == "Part" then
             local sound = part:FindFirstChild("HoHoHo")
             if sound then
                 part:Destroy()
@@ -435,10 +435,7 @@ if not success then
     print(err)
 end
 
-
-
 local function infhp(table)
-    if #table == 0 then return end
     local remote = GetDiamondRemote()
     for i = 1, #table do
         task.spawn(function()
@@ -451,7 +448,6 @@ local function infhp(table)
         end)
     end
 end
-
 
 local PlatformCooldown = false
 
@@ -597,7 +593,6 @@ local function TouchInterestPlatformKill(plr) --old unstable pltaform kill
 end
 
 local function kill(table)
-    if #table == 0 then return end
     pcall(function()
         local remote = GetDiamondRemote()
         for i = 1, #table do
@@ -834,7 +829,6 @@ local function baseprotection(myPlayer)
     end
 end
 local function nanHealth(table)
-    if #table == 0 then return end
     local remote = GetDiamondRemote()
     if remote then
         sendDiamondRemoteToPlayersTable(remote, table, NaN)
@@ -845,28 +839,36 @@ end
 local function MainLoop()
     pcall(function()
         task.spawn(function()
+            if #LoopkillList == 0 then return end
             kill(LoopkillList)
         end)
         task.spawn(function()
+            if #LoopGodList == 0 then return end
             infhp(LoopGodList)
         end)
         task.spawn(function()
+            if #saveList == 0 then return end
             nanHealth(saveList)
         end)
         task.spawn(function()
-            if LegacyKillMethod then
-                LegacykorbloxNew()
-            else
-                equipKorbloxAndKillOld()
-            end
+            if #FFkillList == 0 then return end
+            LegacykorbloxNew()
         end)
         task.spawn(function()
+            if #ExplodeList == 0 then return end
             Explode(ExplodeList)
         end)
     end)
 end
 
-
+task.spawn(function()
+    while true do
+        task.wait()
+        task.spawn(function()
+            MainLoop()
+        end)
+    end
+end)
 
 local function getGearFromCatalog(gearId, gearName) --unused
     local character, backpack = GetCharacterAndBackpack()
@@ -990,13 +992,6 @@ local function playRandomMusic()
     playMusic(SoundIDtoPlay)
     print("playing " .. SoundIDtoPlay)
 end
-
-task.spawn(function()
-    while true do
-        task.wait()
-        MainLoop()
-    end
-end)
 
 
 local function forLoopForList(List, func, ListToPut)
@@ -1389,7 +1384,6 @@ adminCommands["kill"] = function(payload)
     end
 end
 local function dealDamage(table, dmg)
-    if #table == 0 then return end
     local DamageToDeal = number(dmg)
     checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
 
@@ -1494,8 +1488,6 @@ adminCommands["loopkill"] = function(payload)
     local player = payload["player"]
     local target = payload["data"]
     checkAndGetGear(gearTable["Diamond Blade Sword"]["name"])
-
-
     if player and target then
         local findtargets = FindPlayers(player, target[1])
         if findtargets == nil then return end
