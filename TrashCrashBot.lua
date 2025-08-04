@@ -442,7 +442,7 @@ ToggleAsset(gearTable["RocketJumper"]["id"])
 
 LocalPlayer.OnTeleport:Connect(function(State)
     if queueteleport then
-        queueteleport("print('lol')")
+        queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/SillyVoices/CatalogMainScript/main/TrashCrashBot.lua'))()")
     end
 end)
 
