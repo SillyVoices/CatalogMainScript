@@ -937,7 +937,7 @@ local function crashfunction() --thanks for leaking inter crash, now my script i
     local Backpack = LocalPlayer:FindFirstChild("Backpack")
     if not (Character and Backpack) then return end
     local AligatorGear = Backpack:FindFirstChild("Balligator") or Character:FindFirstChild("Balligator")
-    local Intergalatic = Backpack:FindFirstChild("SpaceSword") or Backpack:FindFirstChild("SpaceSword")
+    local Intergalatic = Backpack:FindFirstChild("SpaceSword") or Character:FindFirstChild("SpaceSword")
     if not (AligatorGear and Intergalatic) then return end
     if AligatorGear.Parent == Backpack then
         AligatorGear.Parent = Character
@@ -1231,7 +1231,7 @@ local function CrashCommand()
     local Backpack = LocalPlayer:FindFirstChild("Backpack")
     if not (Character and Backpack) then return end
     local AligatorGear = Backpack:FindFirstChild("Balligator") or Character:FindFirstChild("Balligator")
-    local Intergalatic = Backpack:FindFirstChild("SpaceSword") or Backpack:FindFirstChild("SpaceSword")
+    local Intergalatic = Backpack:FindFirstChild("SpaceSword") or Character:FindFirstChild("SpaceSword")
     if (AligatorGear and Intergalatic) then
         crashfunction()
     else
