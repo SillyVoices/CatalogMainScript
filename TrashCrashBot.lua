@@ -12,8 +12,6 @@ local VirtualUser         = game:GetService("VirtualUser")
 local Stats               = game:GetService("Stats")
 local HttpService         = game:GetService("HttpService")
 local LocalPlayer         = Players.LocalPlayer
-local Webhook             =
-"https://discord.com/api/webhooks/1400907819984879636/zXHqkWcUQOys6Mms8atxCJJhwqMc9VQps_24IjzCLtZjFTCi_q0AqTAkE_2K3BM4_usL"
 local ServerUrl           = "https://games.roblox.com/v1/games/26838733/servers/0"
 local HttpRequest         = syn and syn.request or http and http.request or http_request or request or httprequest
 local queueteleport       = queue_on_teleport or (syn and syn.queue_on_teleport) or (fluxus and fluxus.queue_on_teleport)
@@ -87,16 +85,6 @@ local function lobotomy(character)
     end
 end
 
-task.spawn(function()
-    pcall(function()
-        local response = HttpRequest({
-            Url = Webhook,
-            Method = "Post",
-            Headers = { ['Content-Type'] = 'application/json' },
-            Body = HttpService:JSONEncode({ ["content"] = LocalPlayer.Name .. "has Executed the script" })
-        })
-    end)
-end)
 
 pcall(function()
     task.spawn(function()
